@@ -33,8 +33,8 @@ namespace UnitySplines
         public void AddSegment() => throw new System.NotImplementedException();
         public void DeleteSegment(int i) => throw new System.NotImplementedException();
 
-        [SerializeField] protected List<Vector3> points;
-        [SerializeField] protected int segmentSize;
-        [SerializeField] protected int slideSize;
+        [SerializeField] protected int SegmentSize;
+        [SerializeField] protected int SlideSize;
+        [SerializeField] private List<Vector3> _points;
     }
 }

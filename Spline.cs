@@ -14,7 +14,7 @@ namespace UnitySplines
     {
         public Vector3 ValueAt(float t) => throw new System.NotImplementedException();
 
-        [SerializeField] protected SplinePoints points;
-        [SerializeField] protected ISplineGenerator generator;
+        [SerializeField] protected SplinePoints Points;
+        [SerializeField] protected ISplineGenerator Generator;
     }
 }
