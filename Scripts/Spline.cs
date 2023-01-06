@@ -12,26 +12,10 @@ namespace UnitySplines
     [System.Serializable]
     public class Spline
     {
+        #region SplinePoints Property Wrappers
         public int SegmentSize => _generator.SegmentSize;
         public int SlideSize => _generator.SlideSize;
-
-        public Spline(ISplineGenerator generator, params Vector3[] points) => Init(generator, points);
-        public Spline(ISplineGenerator generator, IEnumerable<Vector3> points) => Init(generator, points);
-        public Spline(ISplineGenerator generator, SplinePoints points) => Init(generator, points.Points);
-
-        public Vector3 ValueAt(float t)
-        {
-            (int segmentIndex, float segmentT) = PercentageToSegmentPercentage(t);
-            return _generator.Evaluate(segmentT, _points.Segment(segmentIndex));
-        }
-
-        public void SetGenerator(ISplineGenerator generator)
-        {
-            if (generator == _generator) return;
-            _generator = generator;
-            _points.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
-        }
-
+       
         /// <summary>
         /// Returns the amount of points in the collection.
         /// </summary>
@@ -61,7 +45,26 @@ namespace UnitySplines
         /// Returns all segments in the collection as an IEnumerable.
         /// </summary>
         public IEnumerable<IList<Vector3>> Segments => _points.Segments;
+        #endregion
 
+        public Spline(ISplineGenerator generator, params Vector3[] points) => Init(generator, points);
+        public Spline(ISplineGenerator generator, IEnumerable<Vector3> points) => Init(generator, points);
+        public Spline(ISplineGenerator generator, SplinePoints points) => Init(generator, points.Points);
+
+        public Vector3 ValueAt(float t)
+        {
+            (int segmentIndex, float segmentT) = PercentageToSegmentPercentage(t);
+            return _generator.Evaluate(segmentT, _points.Segment(segmentIndex));
+        }
+
+        public void SetGenerator(ISplineGenerator generator)
+        {
+            if (generator == _generator) return;
+            _generator = generator;
+            _points.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
+        }
+
+        #region SplinePoints Method Wrappers
         /// <summary>
         /// Appends a new segment to the end of the collection.
         /// </summary>
@@ -161,6 +164,7 @@ namespace UnitySplines
         /// <param name="pi">The index of the segment to remove, as pointIndex.</param>
         /// <exception cref="InvalidOperationException">Thrown if the collection does not contain at least two segments. It must always contain at least one full segment.</exception>
         public void DeleteSegmentAtPoint(int pi) => _points.Remove(pi);
+        #endregion
 
         [SerializeField] private SplinePoints _points;
         [SerializeField] private ISplineGenerator _generator; 
