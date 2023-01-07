@@ -53,7 +53,7 @@ namespace UnitySplines
 
         public Vector3 ValueAt(float t)
         {
-            (int segmentIndex, float segmentT) = PercentageToSegmentPercentage(t);
+            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
             return _generator.Evaluate(segmentT, _points.Segment(segmentIndex));
         }
 
@@ -173,19 +173,6 @@ namespace UnitySplines
         {
             _generator = generator;
             _points = new SplinePoints(_generator.SegmentSize, _generator.SlideSize, points);
-        }
-
-        protected (int, float) PercentageToSegmentPercentage(float t)
-        {
-            int segmentIndex = (int)t;
-            if (t % 1 == 0 && t > 0)
-            {
-                segmentIndex--;
-                t = 1f;
-            }
-            else t %= 1;
-
-            return (segmentIndex, t);          
         }
     }
 }

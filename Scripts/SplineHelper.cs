@@ -30,6 +30,19 @@ public static class SplineHelper
     /// <returns>The index of the first point contained in this segment.</returns>
     public static int SegmentToPointIndex(int segmentIndex, int segmentSize, int slideSize) => slideSize * segmentIndex;
 
+    public static (int, float) PercentageToSegmentPercentage(float t)
+    {
+        int segmentIndex = (int)t;
+        if (t % 1 == 0 && t > 0)
+        {
+            segmentIndex--;
+            t = 1f;
+        }
+        else t %= 1;
+
+        return (segmentIndex, t);
+    }
+
     public static Matrix4x4 CreateTMatrix(float t, int order)
     {
         float t2 = t * t;
