@@ -121,6 +121,52 @@ namespace UnitySplines
             return num / dnm;
         }
 
+        public IList<float> GenerateDistanceLUT(int accuracy = -1)
+        {
+            IList<Vector3> flattened = GetFlattened(accuracy);
+            IList<float> distances = new List<float>();
+
+            Vector3 prevPos = _points.Point(0);
+            float cumulativeDistance = 0f;
+            for (int i = 0; i < flattened.Count; i++)
+            {
+                cumulativeDistance += (flattened[i] - prevPos).magnitude;
+                prevPos = flattened[i];
+                distances.Add(cumulativeDistance);
+            }
+
+            return distances;
+        }
+
+        public float DistanceToT(float distance, int accuracy)
+        {
+            if (distance == 0) return 0;
+
+            IList<Vector3> flattened = GetFlattened(accuracy);
+            IList<float> distances = GenerateDistanceLUT(flattened.Count);
+            float length = GetLength(accuracy);
+
+            if (distance > 0 && distance < length)
+            {
+                for (int i = 0; i < distances.Count - 1; i++)
+                {
+                    if (distances[i] <= distance && distance <= distances[i + 1])
+                    {
+                        // TODO: Simply multiplying here with segmentcount *might* be sloppy
+                        float t0 = (float)i / (distances.Count - 1) * SegmentCount;
+                        float t1 = (float)(i + 1) / (distances.Count - 1) * SegmentCount;
+                        // Linearly interpolate between the two distances
+                        return t0 + (distance - distances[i]) * ((t1 - t0) / (distances[i + 1] - distances[i]));
+                    }
+                }
+            }
+
+            if (distance <= 0)
+                return 0;
+            else
+                return SegmentCount;
+        }
+
         public void SetGenerator(ISplineGenerator generator)
         {
             if (generator == _generator) return;
