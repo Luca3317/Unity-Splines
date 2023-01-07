@@ -79,6 +79,23 @@ namespace UnitySplines
             return new Bounds((extrema.Maxima + extrema.Minima) / 2, extrema.Maxima - extrema.Minima);
         }
 
+        public IList<Vector3> GetFlattened(int points = -1)
+        {
+            if (points < 1) throw new System.ArgumentOutOfRangeException();
+
+            List<Vector3> flattened = new List<Vector3>();
+            flattened.Add(_points.Point(0));
+            for (int i = 0; i < SegmentCount; i++)
+            {
+                for (int j = 1; j <= points; j++)
+                {
+                    flattened.Add(ValueAt(i + (float)j / points));
+                }
+            }
+
+            return flattened;
+        }
+
         public void SetGenerator(ISplineGenerator generator)
         {
             if (generator == _generator) return;
