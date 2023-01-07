@@ -63,6 +63,22 @@ namespace UnitySplines
             return _generator.EvaluateDerivative(segmentT, 1, _points.Segment(segmentIndex));
         }
 
+        public Bounds GetBounds()
+        {
+            SplineExtrema extrema = new SplineExtrema();
+            for (int i = 0; i < SegmentCount; i++)
+            {
+                foreach (var extremaT in _generator.GetExtrema(_points.Segment(i)))
+                {
+                    extrema.InsertValueT(i + extremaT, this);
+                }
+                extrema.InsertValue(ValueAt(i));
+            }
+            extrema.InsertValue(ValueAt(SegmentCount));
+
+            return new Bounds((extrema.Maxima + extrema.Minima) / 2, extrema.Maxima - extrema.Minima);
+        }
+
         public void SetGenerator(ISplineGenerator generator)
         {
             if (generator == _generator) return;
