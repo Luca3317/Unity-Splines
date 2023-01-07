@@ -57,6 +57,12 @@ namespace UnitySplines
             return _generator.Evaluate(segmentT, _points.Segment(segmentIndex));
         }
 
+        public Vector3 TangentAt(float t)
+        {
+            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
+            return _generator.EvaluateDerivative(segmentT, 1, _points.Segment(segmentIndex));
+        }
+
         public void SetGenerator(ISplineGenerator generator)
         {
             if (generator == _generator) return;
