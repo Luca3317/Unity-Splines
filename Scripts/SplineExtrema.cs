@@ -30,8 +30,6 @@ namespace UnitySplines
             Vector3 valueAt = spline.ValueAt(t);
             maxima = new Vector3(Mathf.Max(valueAt.x, maxima.x), Mathf.Max(valueAt.y, maxima.y), Mathf.Max(valueAt.z, maxima.z));
             minima = new Vector3(Mathf.Min(valueAt.x, minima.x), Mathf.Min(valueAt.y, minima.y), Mathf.Min(valueAt.z, minima.z));
-
-            Debug.Log("inserted value " + t);
         }
 
         public void Clear()
