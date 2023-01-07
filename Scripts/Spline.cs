@@ -108,6 +108,19 @@ namespace UnitySplines
             return length;
         }
 
+        public float GetCurvatureAt(float t)
+        {
+            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
+            Vector3 derivative = _generator.EvaluateDerivative(segmentT, 1, _points.Segment(segmentIndex));
+            Vector3 secondDerivative = _generator.EvaluateDerivative(segmentT, 2, _points.Segment(segmentIndex));
+            float num = derivative.x * secondDerivative.y - derivative.y * secondDerivative.x;
+            float qdsum = derivative.x * derivative.x + derivative.y * derivative.y;
+            float dnm = Mathf.Pow(qdsum, (float)3 / 2);
+
+            if (num == 0 || dnm == 0) return float.NaN;
+            return num / dnm;
+        }
+
         public void SetGenerator(ISplineGenerator generator)
         {
             if (generator == _generator) return;
