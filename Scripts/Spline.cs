@@ -95,6 +95,18 @@ namespace UnitySplines
 
             return flattened;
         }
+        
+        public float GetLength(int accuracy = -1)
+        {
+            IList<Vector3> flattened = GetFlattened(accuracy);
+            float length = 0f;
+            for (int i = 1; i < flattened.Count; i++)
+            {
+                length += (flattened[i - 1] - flattened[i]).magnitude;
+            }
+
+            return length;
+        }
 
         public void SetGenerator(ISplineGenerator generator)
         {
