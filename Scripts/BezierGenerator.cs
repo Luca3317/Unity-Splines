@@ -35,6 +35,22 @@ namespace UnitySplines.Bezier
             return SplineHelper.Evaluate(t, order, _characteristicMatrix, points);
         }
 
+        public IList<float> GetExtrema(IList<Vector3> points)
+        {
+            Vector3 a = 3 * (-points[0] + 3 * points[1] - 3 * points[2] + points[3]);
+            Vector3 b = 6 * (points[0] - 2 * points[1] + points[2]);
+            Vector3 c = 3 * (points[1] - points[0]);
+
+            float tx1 = a.x != 0 ? (-b.x + Mathf.Sqrt(b.x * b.x - 4 * a.x * c.x)) / (2 * a.x) : float.NaN;
+            float tx2 = a.x != 0 ? (-b.x - Mathf.Sqrt(b.x * b.x - 4 * a.x * c.x)) / (2 * a.x) : float.NaN;
+            float ty1 = a.y != 0 ? (-b.y + Mathf.Sqrt(b.y * b.y - 4 * a.y * c.y)) / (2 * a.y) : float.NaN;
+            float ty2 = a.y != 0 ? (-b.y - Mathf.Sqrt(b.y * b.y - 4 * a.y * c.y)) / (2 * a.y) : float.NaN;
+            float tz1 = a.z != 0 ? (-b.z + Mathf.Sqrt(b.z * b.z - 4 * a.z * c.z)) / (2 * a.z) : float.NaN;
+            float tz2 = a.z != 0 ? (-b.z - Mathf.Sqrt(b.z * b.z - 4 * a.z * c.z)) / (2 * a.z) : float.NaN;
+
+            return new float[] { tx1, tx2, ty1, ty2, tz1, tz2 };
+        }
+
         private const int _segmentSize = 4;
         private const int _slideSize = 3;
         private const string _generatorType = "Bezier";
