@@ -97,8 +97,8 @@ namespace UnitySplines
         public void SetSegmentSizes(int segmentSize, int slideSize)
         {
             if (segmentSize < 1 || slideSize < 1) throw new System.ArgumentException(_segmentSizeAtLeast1ErrorMsg);
-            // TODO: Placeholder code; if the new segmentsize is larger than the amount of points contained in the collection, new points must be added
-            for (int i = _points.Count; i < segmentSize; i++) _points.Add(_points[i - 1] + Vector3.one);
+            if (_points.Count < segmentSize) throw new System.ArgumentException(string.Format(_tooFewPointsToConvertErrorMsg, _points.Count, segmentSize));
+
             _points.RemoveRange(_points.Count - (_points.Count - segmentSize) % slideSize, (_points.Count - segmentSize) % slideSize);
             _segmentSize = segmentSize;
             _slideSize = slideSize;
