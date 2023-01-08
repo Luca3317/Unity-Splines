@@ -9,8 +9,8 @@ namespace UnitySplines
     [System.Serializable]
     public abstract class SplinePointBase : INotifyPropertyChanged
     {
-        public Vector3 Position { get; }
-        public float NormalAngle { get; }
+        public Vector3 Position => _position;
+        public float NormalAngle => _normalAngle;
 
         public float x => Position.x;
         public float y => Position.y;
@@ -28,7 +28,7 @@ namespace UnitySplines
         public void SetPosition(Vector3 newPosition)
         {
             if (newPosition == _position) return;
-
+            
             _position = newPosition;
             NotifyPropertyChanged("Position");
         }
