@@ -24,7 +24,7 @@ namespace UnitySplines
             minima = new Vector3(Mathf.Min(newValue.x, minima.x), Mathf.Min(newValue.y, minima.y), Mathf.Min(newValue.z, minima.z));
         }
 
-        public void InsertValueT(float t, Spline spline)
+        public void InsertValueT<T>(float t, Spline<T> spline) where T: SplinePointBase
         {
             if (t > spline.SegmentCount || t < 0 || float.IsNaN(t)) return;
             Vector3 valueAt = spline.ValueAt(t);
