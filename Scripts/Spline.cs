@@ -19,17 +19,17 @@ namespace UnitySplines
         /// <summary>
         /// Returns the amount of points in the collection.
         /// </summary>
-        public int PointCount => _points.PointCount;
+        public int PointCount => _points.ItemCount;
         /// <summary>
         /// Returns the point at index i of the collection.
         /// </summary>
         /// <param name="i">The index of the point to return.</param>
         /// <returns></returns>
-        public Vector3 Point(int i) => _points.Point(i);
+        public Vector3 Point(int i) => _points.Item(i);
         /// <summary>
         /// Returns all points in the collection as an IEnumerable.
         /// </summary>
-        public IEnumerable<Vector3> Points => _points.Points;
+        public IEnumerable<Vector3> Points => _points.Items;
 
         /// <summary>
         /// Return the amount of segments in the collection.
@@ -49,7 +49,7 @@ namespace UnitySplines
 
         public Spline(ISplineGenerator generator, params Vector3[] points) => Init(generator, points);
         public Spline(ISplineGenerator generator, IEnumerable<Vector3> points) => Init(generator, points);
-        public Spline(ISplineGenerator generator, SplinePoints points) => Init(generator, points.Points);
+        public Spline(ISplineGenerator generator, SegmentedCollection<Vector3> points) => Init(generator, points.Items);
 
         public Vector3 ValueAt(float t)
         {
@@ -84,7 +84,7 @@ namespace UnitySplines
             if (points < 1) throw new System.ArgumentOutOfRangeException();
 
             List<Vector3> flattened = new List<Vector3>();
-            flattened.Add(_points.Point(0));
+            flattened.Add(_points.Item(0));
             for (int i = 0; i < SegmentCount; i++)
             {
                 for (int j = 1; j <= points; j++)
@@ -126,7 +126,7 @@ namespace UnitySplines
             IList<Vector3> flattened = GetFlattened(accuracy);
             IList<float> distances = new List<float>();
 
-            Vector3 prevPos = _points.Point(0);
+            Vector3 prevPos = _points.Item(0);
             float cumulativeDistance = 0f;
             for (int i = 0; i < flattened.Count; i++)
             {
@@ -180,13 +180,13 @@ namespace UnitySplines
         /// </summary>
         /// <param name="points">The points of the new segment. Count must be equal to slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void AddSegment(params Vector3[] points) => _points.Insert(_points.PointCount, points);
+        public void AddSegment(params Vector3[] points) => _points.Insert(_points.ItemCount, points);
         /// <summary>
         /// Appends a new segment to the end of the collection.
         /// </summary>
         /// <param name="points">The points of the new segment. Count must be equal to slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void AddSegment(ICollection<Vector3> points) => _points.Insert(_points.PointCount, points);
+        public void AddSegment(ICollection<Vector3> points) => _points.Insert(_points.ItemCount, points);
         /// <summary>
         /// Inserts a new segment into the collection. Preserves current segments.
         /// </summary>
@@ -221,13 +221,13 @@ namespace UnitySplines
         /// </summary>
         /// <param name="points">The points of the new segments. Count must be a multiple of slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is not a multiple of slideSize.</exception>
-        public void AddSegments(params Vector3[] points) => _points.InsertRange(_points.PointCount, points);
+        public void AddSegments(params Vector3[] points) => _points.InsertRange(_points.ItemCount, points);
         /// <summary>
         /// Appends new segments to the end of the collection.
         /// </summary>
         /// <param name="points">The points of the new segments. Count must be a multiple of slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is not a multiple of slideSize.</exception>
-        public void AddSegments(ICollection<Vector3> points) => _points.InsertRange(_points.PointCount, points);
+        public void AddSegments(ICollection<Vector3> points) => _points.InsertRange(_points.ItemCount, points);
         /// <summary>
         /// Inserts new segments into the collection. Preserves current segments.
         /// </summary>
@@ -261,7 +261,7 @@ namespace UnitySplines
         /// Deletes the last segment of the collection. Preserves all other current segments.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if the collection does not contain at least two segments. It must always contain at least one full segment.</exception>
-        public void DeleteLastSegment() => _points.Remove(_points.PointCount - _points.SlideSize);
+        public void DeleteLastSegment() => _points.Remove(_points.ItemCount - _points.SlideSize);
         /// <summary>
         /// Deletes the si-th segment of the collection. Preserves all other current segments.
         /// </summary>
@@ -276,13 +276,13 @@ namespace UnitySplines
         public void DeleteSegmentAtPoint(int pi) => _points.Remove(pi);
         #endregion
 
-        [SerializeField] private SplinePoints _points;
+        [SerializeField] private SegmentedCollection<Vector3> _points;
         [SerializeField] private ISplineGenerator _generator; 
 
         protected void Init(ISplineGenerator generator, IEnumerable<Vector3> points)
         {
             _generator = generator;
-            _points = new SplinePoints(_generator.SegmentSize, _generator.SlideSize, points);
+            _points = new SegmentedCollection<Vector3>(_generator.SegmentSize, _generator.SlideSize, points);
         }
     }
 }
