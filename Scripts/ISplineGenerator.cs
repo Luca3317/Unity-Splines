@@ -23,10 +23,10 @@ namespace UnitySplines
         public Vector3 EvaluateDerivative(float t, int order, params Vector3[] points) => EvaluateDerivative(t, order, (IList<Vector3>)points);
         public Vector3 EvaluateDerivative(float t, int order, IList<Vector3> points);
 
-        public IList<float> GetExtrema<T>(params T[] points) where T : SplinePointBase => GetExtrema(SplineHelper.SplinePointsToVector(points));
-        public IList<float> GetExtrema<T>(IList<T> points) where T : SplinePointBase => GetExtrema(SplineHelper.SplinePointsToVector(points));
-        public IList<float> GetExtrema(params Vector3[] points) => GetExtrema((IList<Vector3>)points);
-        public IList<float> GetExtrema(IList<Vector3> points);
+        public IList<float> GetExtremaTs<T>(params T[] points) where T : SplinePointBase => GetExtremaTs(SplineHelper.SplinePointsToVector(points));
+        public IList<float> GetExtremaTs<T>(IList<T> points) where T : SplinePointBase => GetExtremaTs(SplineHelper.SplinePointsToVector(points));
+        public IList<float> GetExtremaTs(params Vector3[] points) => GetExtremaTs((IList<Vector3>)points);
+        public IList<float> GetExtremaTs(IList<Vector3> points);
 
         protected const string _pointAmountErrorMessage = "The passed in amount of points ({0}) does not constitute exactly one {1} segment (required amount: {2})";
     }
