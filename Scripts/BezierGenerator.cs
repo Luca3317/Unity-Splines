@@ -35,11 +35,11 @@ namespace UnitySplines.Bezier
             return SplineHelper.Evaluate(t, order, _characteristicMatrix, points);
         }
 
-        public IList<float> GetExtrema(IList<Vector3> points)
+        public static IList<float> GetExtrema(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            Vector3 a = 3 * (-points[0] + 3 * points[1] - 3 * points[2] + points[3]);
-            Vector3 b = 6 * (points[0] - 2 * points[1] + points[2]);
-            Vector3 c = 3 * (points[1] - points[0]);
+            Vector3 a = 3 * (-p0 + 3 * p1 - 3 * p2 + p3);
+            Vector3 b = 6 * (p0 - 2 * p1 + p2);
+            Vector3 c = 3 * (p1 - p0);
 
             float tx1 = a.x != 0 ? (-b.x + Mathf.Sqrt(b.x * b.x - 4 * a.x * c.x)) / (2 * a.x) : float.NaN;
             float tx2 = a.x != 0 ? (-b.x - Mathf.Sqrt(b.x * b.x - 4 * a.x * c.x)) / (2 * a.x) : float.NaN;
@@ -49,6 +49,12 @@ namespace UnitySplines.Bezier
             float tz2 = a.z != 0 ? (-b.z - Mathf.Sqrt(b.z * b.z - 4 * a.z * c.z)) / (2 * a.z) : float.NaN;
 
             return new float[] { tx1, tx2, ty1, ty2, tz1, tz2 };
+        }
+
+        public IList<float> GetExtrema(IList<Vector3> points)
+        {
+            if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
+            return GetExtrema(points[0], points[1], points[2], points[3]);
         }
 
         private const int _segmentSize = 4;
