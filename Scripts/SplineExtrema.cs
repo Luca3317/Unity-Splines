@@ -26,22 +26,21 @@ namespace UnitySplines
             }
         }
 
-        public void InsertValue(Vector3 newValue)
+        public void InsertValue<T>(float t, ISplineGenerator generator, IList<T> points) where T : SplinePointBase => InsertValue(t, generator, SplineHelper.SplinePointsToVector(points));
+        public void InsertValue(float t, ISplineGenerator generator, IList<Vector3> points)
         {
             if (maxima == null) Clear();
+            if (t > ((points.Count - generator.SegmentSize) / generator.SlideSize + 1) || t < 0 || float.IsNaN(t)) return;
 
-            maxima = new Vector3(Mathf.Max(newValue.x, maxima.Value.x), Mathf.Max(newValue.y, maxima.Value.y), Mathf.Max(newValue.z, maxima.Value.z));
-            minima = new Vector3(Mathf.Min(newValue.x, minima.Value.x), Mathf.Min(newValue.y, minima.Value.y), Mathf.Min(newValue.z, minima.Value.z));
+            InsertValueImpl(generator.Evaluate(t, points));
         }
 
         public void InsertValueT<T>(float t, Spline<T> spline) where T: SplinePointBase
         {
             if (maxima == null) Clear();
-
             if (t > spline.SegmentCount || t < 0 || float.IsNaN(t)) return;
-            Vector3 valueAt = spline.ValueAt(t);
-            maxima = new Vector3(Mathf.Max(valueAt.x, maxima.Value.x), Mathf.Max(valueAt.y, maxima.Value.y), Mathf.Max(valueAt.z, maxima.Value.z));
-            minima = new Vector3(Mathf.Min(valueAt.x, minima.Value.x), Mathf.Min(valueAt.y, minima.Value.y), Mathf.Min(valueAt.z, minima.Value.z));
+
+            InsertValueImpl(spline.ValueAt(t));
         }
 
         public void Clear()
@@ -54,8 +53,14 @@ namespace UnitySplines
         {
             if (maxima == null) Clear();
 
-            InsertValue(extrema.Minima);
-            InsertValue(extrema.Maxima);
+            InsertValueImpl(extrema.Minima);
+            InsertValueImpl(extrema.Maxima);
+        }
+
+        private void InsertValueImpl(Vector3 newValue)
+        {
+            maxima = new Vector3(Mathf.Max(newValue.x, maxima.Value.x), Mathf.Max(newValue.y, maxima.Value.y), Mathf.Max(newValue.z, maxima.Value.z));
+            minima = new Vector3(Mathf.Min(newValue.x, minima.Value.x), Mathf.Min(newValue.y, minima.Value.y), Mathf.Min(newValue.z, minima.Value.z));
         }
     }
 }
