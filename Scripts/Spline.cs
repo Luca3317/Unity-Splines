@@ -126,8 +126,6 @@ namespace UnitySplines
         {
             if (_cacher != null && _cacher.Flattened.Count == NeededAccuracy(accuracy)) return _cacher.Flattened;
 
-            Debug.Log("Calculating flattened");
-
             List<Vector3> flattened = new List<Vector3>();
             for (int i = 0; i < SegmentCount; i++)
             {
@@ -146,8 +144,6 @@ namespace UnitySplines
         {
             if (_cacher != null && _cacher[segmentIndex].Flattened.Count == _accuracy) return _cacher[segmentIndex].Flattened;
 
-            Debug.Log("Calculating flattened for segment " + segmentIndex);
-
             IReadOnlyList<Vector3> roFlattened = SplineHelper.GetFlattened(accuracy, _generator, Segment(segmentIndex));
             if (_cacher != null && accuracy == _accuracy) _cacher[segmentIndex].Flattened = SplineHelper.GetFlattened(accuracy, _generator, Segment(segmentIndex));
             return roFlattened;
@@ -158,8 +154,6 @@ namespace UnitySplines
         {
             // Todo i do need lengthaccuracy here; though here i could also say use anything higher than current accuracy, since it doesnt take more storage /iterations
             if (_cacher != null && _cacher.LengthAccuracy == NeededAccuracy(accuracy)) return _cacher.Length;
-
-            Debug.Log("Calculating length with accuracy " + accuracy);
 
             float length = 0f;
             for (int i = 0; i < SegmentCount; i++)
@@ -180,8 +174,6 @@ namespace UnitySplines
         {
             if (_cacher != null && _cacher[segmentIndex].LengthAccuracy == accuracy) return _cacher[segmentIndex].Length;
 
-            Debug.Log("Calculating length of segment " + segmentIndex);
-
             IReadOnlyList<Vector3> flattened = GetFlattenedSegment(segmentIndex, accuracy);
             float length = 0f;
             for (int i = 1; i < flattened.Count; i++)
@@ -195,6 +187,31 @@ namespace UnitySplines
                 _cacher[segmentIndex].LengthAccuracy = accuracy;
             }
             return length;
+        }
+
+        public FrenetFrame GetFrenetFrameAt(float t) => GetFrenetFrameAt(t, _accuracy);
+        public FrenetFrame GetFrenetFrameAt(float t, int accuracy)
+        {
+            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
+            IReadOnlyList<FrenetFrame> roFrames = GenerateSegmentFrenetFrames(segmentIndex, accuracy);
+            t = segmentT;
+
+            // TODO make better check for "t is exact index"
+            if (Mathf.Abs((int)Mathf.Floor((roFrames.Count - 1) * t) - (int)Mathf.Ceil((roFrames.Count - 1) * t)) < 0.0001f)
+                return roFrames[(int)Mathf.Floor((roFrames.Count - 1) * t)];
+
+            FrenetFrame frame1 = roFrames[(int)Mathf.Floor((roFrames.Count - 1) * t)];
+            FrenetFrame frame2 = roFrames[(int)Mathf.Ceil((roFrames.Count - 1) * t)];
+            float weight2 = ((roFrames.Count - 1) * t) % 1;
+            float weight1 = 1f - weight2;
+
+            return new FrenetFrame()
+            {
+                origin = frame1.origin * weight1 + frame2.origin * weight2,
+                tangent = frame1.tangent * weight1 + frame2.tangent * weight2,
+                rotationalAxis = frame1.rotationalAxis * weight1 + frame2.rotationalAxis * weight2,
+                normal = frame1.normal * weight1 + frame2.normal * weight2
+            };
         }
 
         public float DistanceToT(float distance, int accuracy)
@@ -378,16 +395,44 @@ namespace UnitySplines
             return roDistances;
         }
 
+        private IReadOnlyList<FrenetFrame> GenerateFrenetFrames() => GenerateFrenetFrames(_accuracy);
+        private IReadOnlyList<FrenetFrame> GenerateFrenetFrames(int accuracy)
+        {
+            if (_cacher != null && _cacher.Frames.Count == NeededAccuracy(accuracy)) return _cacher.Frames;
+
+            List<FrenetFrame> frames = new List<FrenetFrame>();
+            for (int i = 0; i < SegmentCount - 1; i++)
+            {
+                frames.AddRange(GenerateSegmentFrenetFrames(i, accuracy));
+                frames.RemoveAt(frames.Count - 1);
+            }
+            frames.AddRange(GenerateSegmentFrenetFrames(SegmentCount - 1, accuracy));
+
+            IReadOnlyList<FrenetFrame> roFrames = frames.AsReadOnly();
+            if (_cacher != null && accuracy == _accuracy) _cacher.Frames = roFrames;
+            return roFrames;
+        }
+
+        private IReadOnlyList<FrenetFrame> GenerateSegmentFrenetFrames(int segmentIndex) => GenerateSegmentFrenetFrames(segmentIndex, _accuracy);
+        private IReadOnlyList<FrenetFrame> GenerateSegmentFrenetFrames(int segmentIndex, int accuracy)
+        {
+            if (_cacher != null && _cacher[segmentIndex].Frames.Count == accuracy) return _cacher[segmentIndex].Frames;
+
+            IReadOnlyList<FrenetFrame> roFrames = SplineHelper.GenerateFrenetFrames(accuracy, _generator, Segment(segmentIndex));
+            if (_cacher != null && accuracy == _accuracy) _cacher[segmentIndex].Frames = roFrames;
+            return roFrames;
+        }
+
         private void AddRange(ICollection<T> points)
         {
             _points.AddRange(points);
-            _cacher?.Add(SegmentCount-1);
+            _cacher?.Add(SegmentCount - 1);
         }
 
         private void Add(ICollection<T> points)
         {
             _points.Add(points);
-            _cacher?.Add(SegmentCount-1);
+            _cacher?.Add(SegmentCount - 1);
         }
 
         private void Insert(int i, ICollection<T> points)
