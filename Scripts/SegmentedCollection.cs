@@ -69,22 +69,37 @@ namespace UnitySplines
         public SegmentedCollection(int segmentSize, int slideSize, params T[] items) => Init(segmentSize, slideSize, items);
         public SegmentedCollection(int segmentSize, int slideSize, SegmentedCollection<T> items) => Init(segmentSize, slideSize, items._items.GetRange(0, items._items.Count - (items._items.Count - segmentSize) % slideSize));
 
-        public void Insert(int index, ICollection<T> items)
+        /// <summary>
+        /// Inserts a new segment into the collection at segmentIndex.
+        /// </summary>
+        /// <param name="segmentIndex"></param>
+        /// <param name="items"></param>
+        public void Insert(int segmentIndex, ICollection<T> items)
         {
             if (items.Count != _slideSize) throw new System.ArgumentException(string.Format(_incompatibleAmountOfNewItemsErrorMsg, _slideSize));
-            _items.InsertRange(index, items);
+            _items.InsertRange(segmentIndex * _slideSize, items);
         }
 
-        public void InsertRange(int index, ICollection<T> items)
+        /// <summary>
+        /// Inserts multiple new segments into the collection at segmentIndex.
+        /// </summary>
+        /// <param name="segmentIndex"></param>
+        /// <param name="items"></param>
+        public void InsertRange(int segmentIndex, ICollection<T> items)
         {
             if (items.Count % _slideSize != 0) throw new System.ArgumentException(string.Format(_incompatibleAmountOfNewItemsErrorMsg, _slideSize));
-            _items.InsertRange(index, items);
+            _items.InsertRange(segmentIndex * _slideSize, items);
         }
 
-        public void Remove(int index)
+        /// <summary>
+        /// Removes the segment at segmentIndex from the collection.
+        /// </summary>
+        /// <param name="segementIndex"></param>
+        /// <param name="items"></param>
+        public void Remove(int segmentIndex)
         {
             if (SegmentCount <= 1) throw new System.InvalidOperationException(string.Format(_atLeastOneSegmentErrorMsg));
-            _items.RemoveRange(index, _slideSize);
+            _items.RemoveRange(segmentIndex * _slideSize, _slideSize);
         }
 
         /// <summary>
