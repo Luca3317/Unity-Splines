@@ -190,8 +190,8 @@ namespace UnitySplines
             return distances.AsReadOnly();
         }
 
-        public static IReadOnlyList<FrenetFrame> GenerateFrenetFrames<T>(int accuracy, ISplineGenerator generator, IList<T> points, FrenetFrame? initialOrientation) where T : SplinePointBase => GenerateFrenetFrames(accuracy, generator, SplinePointsToVector(points), initialOrientation);
-        public static IReadOnlyList<FrenetFrame> GenerateFrenetFrames(int accuracy, ISplineGenerator generator, IList<Vector3> points, FrenetFrame? initialOrientation)
+        public static IReadOnlyList<FrenetFrame> GenerateFrenetFrames<T>(int accuracy, ISplineGenerator generator, IList<T> points, FrenetFrame? initialOrientation = null) where T : SplinePointBase => GenerateFrenetFrames(accuracy, generator, SplinePointsToVector(points), initialOrientation);
+        public static IReadOnlyList<FrenetFrame> GenerateFrenetFrames(int accuracy, ISplineGenerator generator, IList<Vector3> points, FrenetFrame? initialOrientation = null)
         {
             float step = 1f / accuracy;
             List<FrenetFrame> frames = new List<FrenetFrame>();
