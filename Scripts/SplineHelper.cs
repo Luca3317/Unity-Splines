@@ -201,7 +201,7 @@ namespace UnitySplines
             else firstFrame = initialOrientation.Value;
 
             frames.Add(firstFrame);
-            for (int i = 0; i < accuracy; i++)
+            for (int i = 1; i < accuracy; i++)
             {
                 var x0 = frames[frames.Count - 1];
                 var t0 = (float)i / accuracy;
