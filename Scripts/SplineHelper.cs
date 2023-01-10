@@ -188,6 +188,56 @@ namespace UnitySplines
             }
 
             return distances.AsReadOnly();
-        }       
+        }
+
+        public static IReadOnlyList<FrenetFrame> GenerateFrenetFrames<T>(int accuracy, ISplineGenerator generator, IList<T> points, FrenetFrame? initialOrientation) where T : SplinePointBase => GenerateFrenetFrames(accuracy, generator, SplinePointsToVector(points), initialOrientation);
+        public static IReadOnlyList<FrenetFrame> GenerateFrenetFrames(int accuracy, ISplineGenerator generator, IList<Vector3> points, FrenetFrame? initialOrientation)
+        {
+            float step = 1f / accuracy;
+            List<FrenetFrame> frames = new List<FrenetFrame>();
+
+            FrenetFrame firstFrame;
+            if (initialOrientation == null) firstFrame = GenerateFrenetFrameAt(0, generator, points);
+            else firstFrame = initialOrientation.Value;
+
+            frames.Add(firstFrame);
+            for (int i = 0; i < accuracy; i++)
+            {
+                var x0 = frames[frames.Count - 1];
+                var t0 = (float)i / accuracy;
+                var t1 = t0 + step;
+
+                var x1 = GenerateFrenetFrameAt(t1, generator, points);
+
+                var v1 = x1.origin - x0.origin;
+                var c1 = Vector3.Dot(v1, v1);
+                var riL = x0.rotationalAxis - v1 * 2 / c1 * Vector3.Dot(v1, x0.rotationalAxis);
+                var tiL = x0.rotationalAxis - v1 * 2 / c1 * Vector3.Dot(v1, x0.tangent);
+
+                var v2 = x1.tangent - tiL;
+                var c2 = Vector3.Dot(v2, v2);
+
+                x1.rotationalAxis = riL - v2 * 2 / c2 * Vector3.Dot(v1, riL);
+                x1.normal = Vector3.Cross(x1.rotationalAxis, x1.tangent);
+                frames.Add(x1);
+            }
+
+            return frames.AsReadOnly();
+        }
+
+        static FrenetFrame GenerateFrenetFrameAt(float t, ISplineGenerator generator, IList<Vector3> points)
+        {
+            FrenetFrame frame = new FrenetFrame();
+            frame.origin = generator.Evaluate(t, points);
+            frame.tangent = generator.EvaluateDerivative(t, 1, points);
+
+            Vector3 a = frame.tangent.normalized;
+            Vector3 b = generator.EvaluateDerivative(t, 2, points).normalized;
+
+            frame.rotationalAxis = Vector3.Cross(b, a).normalized;
+            frame.normal = Vector3.Cross(frame.rotationalAxis, a).normalized;
+
+            return frame;
+        }
     }
 }
