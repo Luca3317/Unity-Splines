@@ -97,7 +97,7 @@ namespace UnitySplines
 
             SplineExtrema extrema = new SplineExtrema();
 
-            foreach (var extremaT in _generator.GetExtrema(_points.Segment(segmentIndex)))
+            foreach (var extremaT in _generator.GetExtremaTs(_points.Segment(segmentIndex)))
             {
                 extrema.InsertValueT(segmentIndex + extremaT, this);
             }
