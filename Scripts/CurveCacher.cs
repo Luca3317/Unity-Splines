@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 
 namespace UnitySplines
@@ -42,11 +43,11 @@ namespace UnitySplines
         public void Clear()
         {
             _extrema = null;
-            _flattened = null;
+            _flattened = new List<Vector3>();
             _length = -1;
             _lengthAccuracy = -1;
-            _distances = null;
-            _frames = null;
+            _distances = new List<float>(); ;
+            _frames = new List<FrenetFrame>(); ;
         }
 
         // TODO

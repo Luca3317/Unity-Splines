@@ -151,8 +151,8 @@ namespace UnitySplines
 
             List<Vector3> flattened = new List<Vector3>();
             //flattened.Add(points[0]);
-            for (int i = 0; i <= accuracy; i++)
-                flattened.Add(generator.Evaluate((float)i / accuracy, points));
+            for (int i = 0; i < accuracy; i++)
+                flattened.Add(generator.Evaluate((float)i / (accuracy-1), points));
 
             return flattened.AsReadOnly();
         }

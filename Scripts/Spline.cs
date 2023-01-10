@@ -13,6 +13,8 @@ namespace UnitySplines
     [System.Serializable]
     public class Spline<T> where T : SplinePointBase
     {
+        public int Accuracy => _accuracy;
+
         #region SplinePoints Property Wrappers
         public int SegmentSize => _generator.SegmentSize;
         public int SlideSize => _generator.SlideSize;
@@ -118,64 +120,67 @@ namespace UnitySplines
         //      Make GetFlattenedSegment not cache
         //      More general change: Modify the entire accuracy concept for caching?
 
-        public IReadOnlyList<Vector3> GetFlattened(int points = -1)
+
+        public IReadOnlyList<Vector3> GetFlattened() => GetFlattened(_accuracy);
+        public IReadOnlyList<Vector3> GetFlattened(int accuracy)
         {
-            if (_cacher != null && _cacher.Flattened.Count >= points * SegmentCount) return _cacher.Flattened;
+            if (_cacher != null && _cacher.Flattened.Count == NeededAccuracy(accuracy)) return _cacher.Flattened;
+
+            Debug.Log("Calculating flattened");
 
             List<Vector3> flattened = new List<Vector3>();
             for (int i = 0; i < SegmentCount; i++)
             {
-                flattened.AddRange(GetFlattenedSegment(i, points));
+                flattened.AddRange(GetFlattenedSegment(i, accuracy));
                 flattened.RemoveAt(flattened.Count - 1);
             }
             flattened.Add(ValueAt(SegmentCount));
 
-            ReadOnlyCollection<Vector3> roFlattened = flattened.AsReadOnly();
-            if (_cacher != null) _cacher.Flattened = roFlattened;
+            IReadOnlyList<Vector3> roFlattened = flattened.AsReadOnly();
+            if (_cacher != null && accuracy == _accuracy) _cacher.Flattened = roFlattened;
             return roFlattened;
         }
 
-        public IReadOnlyList<Vector3> GetFlattenedSegment(int segmentIndex, int points = -1)
+        public IReadOnlyList<Vector3> GetFlattenedSegment(int segmentIndex) => GetFlattenedSegment(segmentIndex, _accuracy);
+        public IReadOnlyList<Vector3> GetFlattenedSegment(int segmentIndex, int accuracy)
         {
-            if (_cacher != null && _cacher[segmentIndex].Flattened.Count >= points) return _cacher[segmentIndex].Flattened;
+            if (_cacher != null && _cacher[segmentIndex].Flattened.Count == _accuracy) return _cacher[segmentIndex].Flattened;
 
-            List<Vector3> flattened = new List<Vector3>();
-            flattened.Add(_points.Item(0).Position);
-            for (int i = 0; i < SegmentCount; i++)
-            {
-                for (int j = 1; j <= points; j++)
-                {
-                    flattened.Add(ValueAt(i + (float)j / points));
-                }
-            }
+            Debug.Log("Calculating flattened for segment " + segmentIndex);
 
-            ReadOnlyCollection<Vector3> roFlattended = flattened.AsReadOnly();
-            if (_cacher != null) _cacher[segmentIndex].Flattened = roFlattended;
-            return roFlattended;
+            IReadOnlyList<Vector3> roFlattened = SplineHelper.GetFlattened(accuracy, _generator, Segment(segmentIndex));
+            if (_cacher != null && accuracy == _accuracy) _cacher[segmentIndex].Flattened = SplineHelper.GetFlattened(accuracy, _generator, Segment(segmentIndex));
+            return roFlattened;
         }
 
-        public float GetLength(int accuracy = -1)
+        public float GetLength() => GetLength(_accuracy);
+        public float GetLength(int accuracy)
         {
-            if (_cacher != null && _cacher.LengthAccuracy >= accuracy) return _cacher.Length;
+            // Todo i do need lengthaccuracy here; though here i could also say use anything higher than current accuracy, since it doesnt take more storage /iterations
+            if (_cacher != null && _cacher.LengthAccuracy == NeededAccuracy(accuracy)) return _cacher.Length;
 
-            IReadOnlyList<Vector3> flattened = GetFlattened(accuracy);
+            Debug.Log("Calculating length with accuracy " + accuracy);
+
             float length = 0f;
-            for (int i = 1; i < flattened.Count; i++)
+            for (int i = 0; i < SegmentCount; i++)
             {
-                length += (flattened[i - 1] - flattened[i]).magnitude;
+                length += GetSegmentLength(i, accuracy);
             }
 
-            if (_cacher != null)
+            if (_cacher != null && accuracy == _accuracy)
             {
                 _cacher.Length = length;
-                _cacher.LengthAccuracy = accuracy;
+                _cacher.LengthAccuracy = NeededAccuracy(_accuracy);
             }
             return length;
         }
 
-        public float GetSegmentLength(int segmentIndex, int accuracy = -1)
+        public float GetSegmentLength(int segmentIndex) => GetSegmentLength(segmentIndex, _accuracy);
+        public float GetSegmentLength(int segmentIndex, int accuracy)
         {
-            if (_cacher != null && _cacher[segmentIndex].LengthAccuracy >= accuracy) return _cacher[segmentIndex].Length;
+            if (_cacher != null && _cacher[segmentIndex].LengthAccuracy == accuracy) return _cacher[segmentIndex].Length;
+
+            Debug.Log("Calculating length of segment " + segmentIndex);
 
             IReadOnlyList<Vector3> flattened = GetFlattenedSegment(segmentIndex, accuracy);
             float length = 0f;
@@ -184,7 +189,7 @@ namespace UnitySplines
                 length += (flattened[i - 1] - flattened[i]).magnitude;
             }
 
-            if (_cacher != null)
+            if (_cacher != null && accuracy == _accuracy)
             {
                 _cacher[segmentIndex].Length = length;
                 _cacher[segmentIndex].LengthAccuracy = accuracy;
@@ -242,6 +247,14 @@ namespace UnitySplines
                 _cacher = new SplineCacher();
             }
             else _cacher = null;
+        }
+
+        public void SetAccuracy(int accuracy)
+        {
+            if (_accuracy == accuracy) return;
+            if (accuracy < 1) throw new System.ArgumentOutOfRangeException();
+            _accuracy = accuracy;
+            ClearCache();
         }
 
         public void SetGenerator(ISplineGenerator generator)
@@ -326,6 +339,7 @@ namespace UnitySplines
         [SerializeField] private SegmentedCollection<T> _points;
         [SerializeField] private ISplineGenerator _generator;
         [SerializeField] private SplineCacher _cacher;
+        [SerializeField] private int _accuracy = 20;
 
         protected void Init(ISplineGenerator generator, bool cache, IEnumerable<T> points)
         {
@@ -338,6 +352,9 @@ namespace UnitySplines
             }
         }
 
+        // TODO:
+        // Maybe move distances from curvecacher to splinecacher
+        // If not; implement this one like the other cachable methods, ie getflattened
         private IReadOnlyList<float> GenerateDistanceLUT(int accuracy = -1)
         {
             if (_cacher != null && _cacher.Distances.Count >= accuracy) return _cacher.Distances;
@@ -390,6 +407,8 @@ namespace UnitySplines
             _points.RemoveAtSegment(i);
             _cacher?.Remove(i);
         }
+
+        private int NeededAccuracy(int accuracy) => accuracy + (SegmentCount - 1) * (accuracy - 1);
 
         // testing
         public void ClearCache()
