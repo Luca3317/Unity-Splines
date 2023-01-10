@@ -257,7 +257,7 @@ namespace UnitySplines
         /// </summary>
         /// <param name="points">The points of the new segment. Count must be equal to slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void AddSegment(params T[] points) => InsertSegment(_points.ItemCount, points); // _points.Insert(_points.ItemCount, points);
+        public void AddSegment(params T[] points) => Insert(_points.ItemCount, points); // _points.Insert(_points.ItemCount, points);
         /// <summary>
         /// Appends a new segment to the end of the collection.
         /// </summary>
@@ -270,7 +270,7 @@ namespace UnitySplines
         /// <param name="segmentIndex">The index of the new segment, as segment index.</param>
         /// <param name="points">The points of the new segment. Count must be equal to slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void InsertSegment(int segmentIndex, params T[] points) => InsertSegment(SplineHelper.SegmentToPointIndex(segmentIndex, SegmentSize, SlideSize), points); //_points.Insert(SplineHelper.SegmentToPointIndex(segmentIndex, _generator.SegmentSize, _generator.SlideSize), points);
+        public void InsertSegment(int segmentIndex, params T[] points) => Insert(SplineHelper.SegmentToPointIndex(segmentIndex, SegmentSize, SlideSize), points); //_points.Insert(SplineHelper.SegmentToPointIndex(segmentIndex, _generator.SegmentSize, _generator.SlideSize), points);
         /// <summary>
         /// Inserts a new segment into the collection. Preserves current segments.
         /// </summary>
@@ -284,7 +284,7 @@ namespace UnitySplines
         /// <param name="pointIndex">The index of the new segment, as point index.</param>
         /// <param name="points">The points of the new segment. Count must be equal to slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void InsertSegmentAtPoint(int pointIndex, params T[] points) => InsertSegment(pointIndex, points); // (pointIndex, points);
+        public void InsertSegmentAtPoint(int pointIndex, params T[] points) => Insert(pointIndex, points); // (pointIndex, points);
         /// <summary>
         /// Inserts a new segment into the collection. Does not necessarily preserve current segments.
         /// </summary>
@@ -298,7 +298,7 @@ namespace UnitySplines
         /// </summary>
         /// <param name="points">The points of the new segments. Count must be a multiple of slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is not a multiple of slideSize.</exception>
-        public void AddSegments(params T[] points) => InsertSegments(_points.ItemCount, points); // _points.InsertRange(_points.ItemCount, points);
+        public void AddSegments(params T[] points) => InsertRange(_points.ItemCount, points); // _points.InsertRange(_points.ItemCount, points);
         /// <summary>
         /// Appends new segments to the end of the collection.
         /// </summary>
@@ -311,7 +311,7 @@ namespace UnitySplines
         /// <param name="segmentIndex">The index of the first of the new segment, as segment index.</param>
         /// <param name="points">The points of the new segments. Count must be a multiple of slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is not a multiple of slideSize.</exception>
-        public void InsertSegments(int segmentIndex, params T[] points) => InsertSegments(SplineHelper.SegmentToPointIndex(segmentIndex, _generator.SegmentSize, _generator.SlideSize), points); //_points.InsertRange(SplineHelper.SegmentToPointIndex(segmentIndex, _generator.SegmentSize, _generator.SlideSize), points);
+        public void InsertSegments(int segmentIndex, params T[] points) => InsertRange(SplineHelper.SegmentToPointIndex(segmentIndex, _generator.SegmentSize, _generator.SlideSize), points); //_points.InsertRange(SplineHelper.SegmentToPointIndex(segmentIndex, _generator.SegmentSize, _generator.SlideSize), points);
         /// <summary>
         /// Inserts new segments into the collection. Preserves current segments.
         /// </summary>
@@ -325,7 +325,7 @@ namespace UnitySplines
         /// <param name="pointIndex">The index of the first of the new segments, as point index.</param>
         /// <param name="points">The points of the new segments. Count must be equal to slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void InsertSegmentsAtPoint(int pointIndex, params T[] points) => InsertSegments(pointIndex, points); //_points.InsertRange(pointIndex, points);
+        public void InsertSegmentsAtPoint(int pointIndex, params T[] points) => InsertRange(pointIndex, points); //_points.InsertRange(pointIndex, points);
         /// <summary>
         /// Inserts new segments into the collection. Does not necessarily preserve current segments.
         /// </summary>
