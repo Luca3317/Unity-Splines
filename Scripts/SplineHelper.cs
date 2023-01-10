@@ -123,5 +123,71 @@ namespace UnitySplines
         public static Vector3 Evaluate(float t, int order, Matrix4x4 characteristicMatrix, IList<Vector3> points) => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
         public static Vector3 Evaluate<T>(float t, int order, Matrix4x4 characteristicMatrix, params T[] points) where T : SplinePointBase => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
         public static Vector3 Evaluate<T>(float t, int order, Matrix4x4 characteristicMatrix, IList<T> points) where T : SplinePointBase => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
+        #endregion
+
+        public static Bounds GetBounds<T>(ISplineGenerator generator, IList<T> points) where T : SplinePointBase => GetBounds(generator, SplinePointsToVector(points));
+        public static Bounds GetBounds(ISplineGenerator generator, IList<Vector3> points)
+        {
+            SplineExtrema extrema = GetExtrema(generator, points);
+            return new Bounds((extrema.Maxima + extrema.Minima) / 2, extrema.Maxima - extrema.Minima);
+        }
+
+        public static SplineExtrema GetExtrema<T>(ISplineGenerator generator, IList<T> points) where T : SplinePointBase => GetExtrema(generator, SplinePointsToVector(points));
+        public static SplineExtrema GetExtrema(ISplineGenerator generator, IList<Vector3> points)
+        {
+            SplineExtrema extrema = new SplineExtrema();
+            foreach (var extremaT in generator.GetExtremaTs(points))
+                extrema.InsertValue(extremaT, generator, points);
+
+            extrema.InsertValue(0, generator, points);
+            extrema.InsertValue(1, generator, points);
+            return extrema;
+        }
+
+        public static IReadOnlyList<Vector3> GetFlattened<T>(int accuracy, ISplineGenerator generator, IList<T> points) where T : SplinePointBase => GetFlattened(accuracy, generator, SplinePointsToVector(points));
+        public static IReadOnlyList<Vector3> GetFlattened(int accuracy, ISplineGenerator generator, IList<Vector3> points)
+        {
+            if (accuracy < 1) throw new System.ArgumentOutOfRangeException();
+
+            List<Vector3> flattened = new List<Vector3>();
+            //flattened.Add(points[0]);
+            for (int i = 0; i <= accuracy; i++)
+                flattened.Add(generator.Evaluate((float)i / accuracy, points));
+
+            return flattened.AsReadOnly();
+        }
+
+        public static float GetLength<T>(int accuracy, ISplineGenerator generator, IList<T> points) where T : SplinePointBase => GetLength(accuracy, generator, SplinePointsToVector(points));
+        public static float GetLength(int accuracy, ISplineGenerator generator, IList<Vector3> points)
+        {
+            if (accuracy < 1) throw new System.ArgumentOutOfRangeException();
+
+            IReadOnlyList<Vector3> flattened = GetFlattened(accuracy, generator, points);
+            float length = 0f;
+            for (int i = 1; i < flattened.Count; i++)
+                length += (flattened[i - 1] - flattened[i]).magnitude;
+
+            return length;
+        }
+
+        public static IReadOnlyList<float> GetDistanceLUT<T>(int accuracy, ISplineGenerator generator, IList<T> points, float startingDistance) where T : SplinePointBase => GetDistanceLUT(accuracy, generator, SplinePointsToVector(points), startingDistance);
+        public static IReadOnlyList<float> GetDistanceLUT(int accuracy, ISplineGenerator generator, IList<Vector3> points, float startingDistance = 0)
+        {
+            if (accuracy < 1) throw new System.ArgumentOutOfRangeException();
+
+            IReadOnlyList<Vector3> flattened = GetFlattened(accuracy, generator, points);
+            List<float> distances = new List<float>();
+
+            Vector3 prevPos = points[0];
+            float cumulativeDistance = startingDistance;
+            for (int i = 0; i < flattened.Count; i++)
+            {
+                cumulativeDistance += (flattened[i] - prevPos).magnitude;
+                prevPos = flattened[i];
+                distances.Add(cumulativeDistance);
+            }
+
+            return distances.AsReadOnly();
+        }       
     }
 }
