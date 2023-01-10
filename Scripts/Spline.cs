@@ -257,107 +257,70 @@ namespace UnitySplines
         /// </summary>
         /// <param name="points">The points of the new segment. Count must be equal to slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void AddSegment(params T[] points) => Insert(SegmentCount, points);
+        public void AddSegment(params T[] points) => Add(points);
         /// <summary>
         /// Appends a new segment to the end of the collection.
         /// </summary>
         /// <param name="points">The points of the new segment. Count must be equal to slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void AddSegment(ICollection<T> points) => Insert(SegmentCount, points);
+        public void AddSegment(ICollection<T> points) => Add(points);
         /// <summary>
         /// Inserts a new segment into the collection. Preserves current segments.
         /// </summary>
         /// <param name="segmentIndex">The index of the new segment, as segment index.</param>
         /// <param name="points">The points of the new segment. Count must be equal to slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void InsertSegment(int segmentIndex, params T[] points) => Insert(segmentIndex, points); //_points.Insert(SplineHelper.SegmentToPointIndex(segmentIndex, _generator.SegmentSize, _generator.SlideSize), points);
+        public void InsertSegment(int segmentIndex, params T[] points) => Insert(segmentIndex, points);
         /// <summary>
         /// Inserts a new segment into the collection. Preserves current segments.
         /// </summary>
         /// <param name="segmentIndex">The index of the new segment, as segment index.</param>
         /// <param name="points">The points of the new segment. Count must be equal to slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void InsertSegment(int segmentIndex, ICollection<T> points) => Insert(segmentIndex, points); //_points.Insert(SplineHelper.SegmentToPointIndex(segmentIndex, _generator.SegmentSize, _generator.SlideSize), points);
-       
-        /*
-        /// <summary>
-        /// Inserts a new segment into the collection. Does not necessarily preserve current segments.
-        /// </summary>
-        /// <param name="pointIndex">The index of the new segment, as point index.</param>
-        /// <param name="points">The points of the new segment. Count must be equal to slideSize.</param>
-        /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void InsertSegmentAtPoint(int pointIndex, params T[] points) => Insert(pointIndex, points); // (pointIndex, points);
-        /// <summary>
-        /// Inserts a new segment into the collection. Does not necessarily preserve current segments.
-        /// </summary>
-        /// <param name="pointIndex">The index of the new segment, as point index.</param>
-        /// <param name="points">The points of the new segment. Count must be equal to slideSize.</param>
-        /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void InsertSegmentAtPoint(int pointIndex, ICollection<T> points) => Insert(pointIndex, points); // (pointIndex, points);
-        */
+        public void InsertSegment(int segmentIndex, ICollection<T> points) => Insert(segmentIndex, points);
 
         /// <summary>
         /// Appends new segments to the end of the collection.
         /// </summary>
         /// <param name="points">The points of the new segments. Count must be a multiple of slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is not a multiple of slideSize.</exception>
-        public void AddSegments(params T[] points) => InsertRange(SegmentCount, points); // _points.InsertRange(_points.ItemCount, points);
-        /// <summary>
+        public void AddSegments(params T[] points) => AddRange(points);
         /// Appends new segments to the end of the collection.
         /// </summary>
         /// <param name="points">The points of the new segments. Count must be a multiple of slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is not a multiple of slideSize.</exception>
-        public void AddSegments(ICollection<T> points) => InsertRange(SegmentCount, points); //_points.InsertRange(_points.ItemCount, points);
+        public void AddSegments(ICollection<T> points) => AddRange(points);
         /// <summary>
         /// Inserts new segments into the collection. Preserves current segments.
         /// </summary>
         /// <param name="segmentIndex">The index of the first of the new segment, as segment index.</param>
         /// <param name="points">The points of the new segments. Count must be a multiple of slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is not a multiple of slideSize.</exception>
-        public void InsertSegments(int segmentIndex, params T[] points) => InsertRange(segmentIndex, points); //_points.InsertRange(SplineHelper.SegmentToPointIndex(segmentIndex, _generator.SegmentSize, _generator.SlideSize), points);
+        public void InsertSegments(int segmentIndex, params T[] points) => InsertRange(segmentIndex, points);
         /// <summary>
         /// Inserts new segments into the collection. Preserves current segments.
         /// </summary>
         /// <param name="segmentIndex">The index of the first of the new segments, as segment index.</param>
         /// <param name="points">The points of the new segments. Count must be a multiple of slideSize.</param>
         /// <exception cref="ArgumentException">Thrown if count of points is not a multiple of slideSize.</exception>
-        public void InsertSegments(int segmentIndex, ICollection<T> points) => InsertRange(segmentIndex, points); //_points.InsertRange(SplineHelper.SegmentToPointIndex(segmentIndex, _generator.SegmentSize, _generator.SlideSize), points);
-        
-        /*
-        /// <summary>
-        /// Inserts new segments into the collection. Does not necessarily preserve current segments.
-        /// </summary>
-        /// <param name="pointIndex">The index of the first of the new segments, as point index.</param>
-        /// <param name="points">The points of the new segments. Count must be equal to slideSize.</param>
-        /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void InsertSegmentsAtPoint(int pointIndex, params T[] points) => InsertRange(pointIndex, points); //_points.InsertRange(pointIndex, points);
-        /// <summary>
-        /// Inserts new segments into the collection. Does not necessarily preserve current segments.
-        /// </summary>
-        /// <param name="pointIndex">The index of the first of the new segments, as point index.</param>
-        /// <param name="points">The points of the new segments. Count must be equal to slideSize.</param>
-        /// <exception cref="ArgumentException">Thrown if count of points is unequal to slideSize.</exception>
-        public void InsertSegmentsAtPoint(int pointIndex, ICollection<T> points) => InsertRange(pointIndex, points); //_points.InsertRange(pointIndex, points);
-        */
+        public void InsertSegments(int segmentIndex, ICollection<T> points) => InsertRange(segmentIndex, points);
 
         /// <summary>
         /// Deletes the last segment of the collection. Preserves all other current segments.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if the collection does not contain at least two segments. It must always contain at least one full segment.</exception>
-        public void DeleteLastSegment() => Remove(SegmentCount - 1); // _points.Remove(_points.ItemCount - _points.SlideSize);
+        public void DeleteLastSegment() => Remove(SegmentCount - 1);
         /// <summary>
         /// Deletes the si-th segment of the collection. Preserves all other current segments.
         /// </summary>
         /// <param name="segmentIndex">The index of the segment to remove, as segmentIndex.</param>
         /// <exception cref="InvalidOperationException">Thrown if the collection does not contain at least two segments. It must always contain at least one full segment.</exception>
-        public void DeleteSegment(int segmentIndex) => Remove(segmentIndex); //_points.Remove(SplineHelper.SegmentToPointIndex(si, _generator.SegmentSize, _generator.SlideSize));
+        public void DeleteSegment(int segmentIndex) => Remove(segmentIndex);
         /// <summary>
         /// Interpretes the points pi to pi + slideSize as segment, and deletes it from the collection. 
         /// </summary>
         /// <param name="pi">The index of the segment to remove, as pointIndex.</param>
         /// <exception cref="InvalidOperationException">Thrown if the collection does not contain at least two segments. It must always contain at least one full segment.</exception>
-        
-        //public void DeleteSegmentAtPoint(int pi) => Remove(pi); //_points.Remove(pi);
         #endregion
 
         [SerializeField] private SegmentedCollection<T> _points;
@@ -398,21 +361,33 @@ namespace UnitySplines
             return roDistances;
         }
 
+        private void AddRange(ICollection<T> points)
+        {
+            _points.AddRange(points);
+            _cacher?.Add(SegmentCount-1);
+        }
+
+        private void Add(ICollection<T> points)
+        {
+            _points.Add(points);
+            _cacher?.Add(SegmentCount-1);
+        }
+
         private void Insert(int i, ICollection<T> points)
         {
-            _points.Insert(i, points);
+            _points.InsertAtSegment(i, points);
             _cacher?.Add(i);
         }
 
         private void InsertRange(int i, ICollection<T> points)
         {
-            _points.InsertRange(i, points);
+            _points.InsertRangeAtSegment(i, points);
             _cacher?.Add(i, points.Count % SlideSize);
         }
 
         private void Remove(int i)
         {
-            _points.Remove(i);
+            _points.RemoveAtSegment(i);
             _cacher?.Remove(i);
         }
 

@@ -69,26 +69,38 @@ namespace UnitySplines
         public SegmentedCollection(int segmentSize, int slideSize, params T[] items) => Init(segmentSize, slideSize, items);
         public SegmentedCollection(int segmentSize, int slideSize, SegmentedCollection<T> items) => Init(segmentSize, slideSize, items._items.GetRange(0, items._items.Count - (items._items.Count - segmentSize) % slideSize));
 
-        /// <summary>
-        /// Inserts a new segment into the collection at segmentIndex.
-        /// </summary>
-        /// <param name="segmentIndex"></param>
-        /// <param name="items"></param>
-        public void Insert(int segmentIndex, ICollection<T> items)
+        public void Add(ICollection<T> items)
         {
             if (items.Count != _slideSize) throw new System.ArgumentException(string.Format(_incompatibleAmountOfNewItemsErrorMsg, _slideSize));
-            _items.InsertRange(segmentIndex * _slideSize, items);
+            _items.AddRange(items);
+        }
+
+        public void AddRange(ICollection<T> items)
+        {
+            if (items.Count % _slideSize != 0) throw new System.ArgumentException(string.Format(_incompatibleAmountOfNewItemsErrorMsg, _slideSize));
+            _items.AddRange(items);
         }
 
         /// <summary>
-        /// Inserts multiple new segments into the collection at segmentIndex.
+        /// Inserts a new segment into the collection at index.
         /// </summary>
-        /// <param name="segmentIndex"></param>
+        /// <param name="pointIndex"></param>
         /// <param name="items"></param>
-        public void InsertRange(int segmentIndex, ICollection<T> items)
+        public void InsertAtPoint(int pointIndex, ICollection<T> items)
+        {
+            if (items.Count != _slideSize) throw new System.ArgumentException(string.Format(_incompatibleAmountOfNewItemsErrorMsg, _slideSize));
+            _items.InsertRange(pointIndex, items);
+        }
+
+        /// <summary>
+        /// Inserts multiple new segments into the collection at index.
+        /// </summary>
+        /// <param name="pointIndex"></param>
+        /// <param name="items"></param>
+        public void InsertRangeAtPoint(int pointIndex, ICollection<T> items)
         {
             if (items.Count % _slideSize != 0) throw new System.ArgumentException(string.Format(_incompatibleAmountOfNewItemsErrorMsg, _slideSize));
-            _items.InsertRange(segmentIndex * _slideSize, items);
+            _items.InsertRange(pointIndex, items);
         }
 
         /// <summary>
@@ -96,7 +108,25 @@ namespace UnitySplines
         /// </summary>
         /// <param name="segementIndex"></param>
         /// <param name="items"></param>
-        public void Remove(int segmentIndex)
+        public void RemoveAtPoint(int pointIndex)
+        {
+            if (SegmentCount <= 1) throw new System.InvalidOperationException(string.Format(_atLeastOneSegmentErrorMsg));
+            _items.RemoveRange(pointIndex, _slideSize);
+        }
+
+        public void InsertAtSegment(int segmentIndex, ICollection<T> items)
+        {
+            if (items.Count != _slideSize) throw new System.ArgumentException(string.Format(_incompatibleAmountOfNewItemsErrorMsg, _slideSize));
+            _items.InsertRange(segmentIndex * _slideSize, items);
+        }
+
+        public void InsertRangeAtSegment(int segmentIndex, ICollection<T> items)
+        {
+            if (items.Count != _slideSize) throw new System.ArgumentException(string.Format(_incompatibleAmountOfNewItemsErrorMsg, _slideSize));
+            _items.InsertRange(segmentIndex * _slideSize, items);
+        }
+
+        public void RemoveAtSegment(int segmentIndex)
         {
             if (SegmentCount <= 1) throw new System.InvalidOperationException(string.Format(_atLeastOneSegmentErrorMsg));
             _items.RemoveRange(segmentIndex * _slideSize, _slideSize);
