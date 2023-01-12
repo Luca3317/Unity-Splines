@@ -132,6 +132,15 @@ namespace UnitySplines
             _items.RemoveRange(segmentIndex * _slideSize, _slideSize);
         }
 
+        public int IndexOf(T item) => _items.IndexOf(item);
+        public IEnumerable<int> SegmentIndecesOf(T item)
+        {
+            // TODO: Rename and move some functions from SplineHelper to more general helper class
+            IList<int> indeces = SplineHelper.PointToSegmentIndeces(_items.IndexOf(item), _segmentSize, _slideSize);
+            indeces.Remove(SegmentCount);
+            return indeces;
+        }
+
         /// <summary>
         /// Sets the segment sizes.
         /// </summary>

@@ -6,31 +6,36 @@ namespace UnitySplines
 {
     public static class SplineHelper
     {
+        #region Converters
         /// <summary>
         /// Converts a point index to the corresponding segment indeces.
         /// </summary>
         /// <param name="pointIndex">The point index that will be converted.</param>
         /// <returns>The indeces of all segments that contain the point at i.</returns>
-        public static IEnumerable<int> PointToSegmentIndeces(int pointIndex, int segmentSize, int slideSize)
+        public static IList<int> PointToSegmentIndeces(int pointIndex, int segmentSize, int slideSize)
         {
             List<int> indeces = new List<int>();
 
-            // Calculate index of first segment containing this point.
-            int index = pointIndex < segmentSize ? 0 : (pointIndex - segmentSize) / slideSize + 1;
+            int firstIndex = pointIndex - pointIndex % slideSize;
+            int lastIndex = firstIndex + slideSize;
 
-            while (pointIndex - index >= 0)
+            while (pointIndex <= lastIndex)
             {
-                indeces.Add(index);
-                index += slideSize;
+                indeces.Add(PointToFirstSegmentIndex(pointIndex, segmentSize, slideSize));
+                pointIndex += slideSize;
             }
+
             return indeces;
         }
+        public static int PointToFirstSegmentIndex(int pointIndex, int segmentSize, int slideSize)
+            => pointIndex < segmentSize ? 0 : (pointIndex - segmentSize) / slideSize + 1;
         /// <summary>
         /// Converts a segment index to the corresponding point index.
         /// </summary>
         /// <param name="segmentIndex">The segment index to convert.</param>
         /// <returns>The index of the first point contained in this segment.</returns>
         public static int SegmentToPointIndex(int segmentIndex, int segmentSize, int slideSize) => slideSize * segmentIndex;
+
 
         public static IList<Vector3> SplinePointsToVector<T>(IList<T> points) where T : SplinePointBase
         {

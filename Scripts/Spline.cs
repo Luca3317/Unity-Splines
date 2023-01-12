@@ -258,12 +258,16 @@ namespace UnitySplines
 
         public void SetCache(bool cache)
         {
-            if (cache)
+            if (cache && _cacher == null)
             {
-                if (_cacher != null) return;
+                foreach (T point in _points.Items) point.PropertyChanged += OnPointChanged;
                 _cacher = new SplineCacher();
             }
-            else _cacher = null;
+            else if (!cache && _cacher != null)
+            {
+                foreach (T point in _points.Items) point.PropertyChanged -= OnPointChanged;
+                _cacher = null;
+            }
         }
 
         public void SetAccuracy(int accuracy)
@@ -365,6 +369,7 @@ namespace UnitySplines
             if (cache)
             {
                 _cacher = new SplineCacher();
+                foreach (T point in points) point.PropertyChanged += OnPointChanged;
                 for (int i = 0; i < SegmentCount; i++) _cacher.Add();
             }
         }
@@ -425,32 +430,71 @@ namespace UnitySplines
 
         private void AddRange(ICollection<T> points)
         {
+            if (points.Contains(null)) throw new System.ArgumentNullException();
             _points.AddRange(points);
-            _cacher?.Add(SegmentCount - 1);
+            if (_cacher != null)
+            {
+                foreach (T point in points) point.PropertyChanged += OnPointChanged;
+                _cacher.Add(SegmentCount - 1);
+            }
         }
 
         private void Add(ICollection<T> points)
         {
+            if (points.Contains(null)) throw new System.ArgumentNullException();
             _points.Add(points);
-            _cacher?.Add(SegmentCount - 1);
+            if (_cacher != null)
+            {
+                foreach (T point in points) point.PropertyChanged += OnPointChanged;
+                _cacher.Add(SegmentCount - 1);
+            }
         }
 
         private void Insert(int i, ICollection<T> points)
         {
+            if (points.Contains(null)) throw new System.ArgumentNullException();
             _points.InsertAtSegment(i, points);
-            _cacher?.Add(i);
+            if (_cacher != null)
+            {
+                foreach (T point in points) point.PropertyChanged += OnPointChanged;
+                _cacher.Add(i);
+            }
         }
 
         private void InsertRange(int i, ICollection<T> points)
         {
+            if (points.Contains(null)) throw new System.ArgumentNullException();
             _points.InsertRangeAtSegment(i, points);
-            _cacher?.Add(i, points.Count % SlideSize);
+            if (_cacher != null)
+            {
+                foreach (T point in points) point.PropertyChanged += OnPointChanged;
+                _cacher.Add(i, points.Count % SlideSize);
+            }
         }
 
         private void Remove(int i)
         {
+            if (_cacher != null)
+            {
+                var points = Segment(i);
+                foreach (T point in points) point.PropertyChanged -= OnPointChanged;
+                _cacher.Remove(i);
+            }
             _points.RemoveAtSegment(i);
-            _cacher?.Remove(i);
+        }
+
+        private void OnPointChanged(object sender, PropertyChangedEventArgs args)
+        {
+            if (args.PropertyName != "Position") return;
+
+            var indeces = _points.SegmentIndecesOf((T)sender);
+
+            foreach (int index in indeces)
+            {
+                _cacher[index].Clear();
+            }
+
+            _cacher.Clear();
         }
 
         private int NeededAccuracy(int accuracy) => accuracy + (SegmentCount - 1) * (accuracy - 1);
