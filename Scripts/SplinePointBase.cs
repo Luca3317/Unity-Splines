@@ -10,7 +10,6 @@ namespace UnitySplines
     public abstract class SplinePointBase : INotifyPropertyChanged
     {
         public Vector3 Position => _position;
-        public float NormalAngle => _normalAngle;
 
         public float x => Position.x;
         public float y => Position.y;
@@ -18,27 +17,17 @@ namespace UnitySplines
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public SplinePointBase(Vector3 position) : this(position, 0f) { }
-        public SplinePointBase(Vector3 position, float normalAngle)
+        public SplinePointBase(Vector3 position)
         {
             _position = position;
-            _normalAngle = normalAngle;
         }
 
         public void SetPosition(Vector3 newPosition)
         {
             if (newPosition == _position) return;
-            
+
             _position = newPosition;
             NotifyPropertyChanged("Position");
-        }
-
-        public void SetNormalAngle(float newAngle)
-        {
-            if (newAngle == _normalAngle) return;
-
-            _normalAngle = newAngle;
-            NotifyPropertyChanged("NormalAngle");
         }
 
         protected void NotifyPropertyChanged(string propertyName = "")
@@ -47,6 +36,5 @@ namespace UnitySplines
         }
 
         [SerializeField] private Vector3 _position;
-        [SerializeField] private float _normalAngle;
     }
 }
