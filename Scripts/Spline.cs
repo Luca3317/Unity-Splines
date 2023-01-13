@@ -12,7 +12,7 @@ namespace UnitySplines
      * Maybe inherit from SplinePoints instead of wrapper methods?
      */
     [System.Serializable]
-    public class Spline<T> where T : SplinePointBase
+    public class Spline<T> where T : SplinePoint
     {
         public int Accuracy => _accuracy;
 
@@ -515,10 +515,10 @@ namespace UnitySplines
     }
 
     [System.Serializable]
-    public class Spline : Spline<SplinePointBase>
+    public class Spline : Spline<SplinePoint>
     {
-        public Spline(ISplineGenerator generator, bool cache, params SplinePointBase[] points) : base(generator, cache, points) { }
-        public Spline(ISplineGenerator generator, bool cache, IEnumerable<SplinePointBase> points) : base(generator, cache, points) { }
-        public Spline(ISplineGenerator generator, bool cache, SegmentedCollection<SplinePointBase> points) : base(generator, cache, points.Items) { }
+        public Spline(ISplineGenerator generator, bool cache, params SplinePoint[] points) : base(generator, cache, points) { }
+        public Spline(ISplineGenerator generator, bool cache, IEnumerable<SplinePoint> points) : base(generator, cache, points) { }
+        public Spline(ISplineGenerator generator, bool cache, SegmentedCollection<SplinePoint> points) : base(generator, cache, points.Items) { }
     }
 }

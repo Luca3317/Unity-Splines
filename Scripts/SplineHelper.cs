@@ -37,7 +37,7 @@ namespace UnitySplines
         public static int SegmentToPointIndex(int segmentIndex, int segmentSize, int slideSize) => slideSize * segmentIndex;
 
 
-        public static IList<Vector3> SplinePointsToVector<T>(IList<T> points) where T : SplinePointBase
+        public static IList<Vector3> SplinePointsToVector<T>(IList<T> points) where T : SplinePoint
         {
             List<Vector3> vectors = new List<Vector3>();
             foreach (var item in points) vectors.Add(item.Position);
@@ -111,8 +111,8 @@ namespace UnitySplines
             return pMatrix;
         }
 
-        public static Matrix4x4 CreatePointMatrix<T>(params T[] points) where T : SplinePointBase => CreatePointMatrix((IList<T>)points);
-        public static Matrix4x4 CreatePointMatrix<T>(IList<T> points) where T : SplinePointBase
+        public static Matrix4x4 CreatePointMatrix<T>(params T[] points) where T : SplinePoint => CreatePointMatrix((IList<T>)points);
+        public static Matrix4x4 CreatePointMatrix<T>(IList<T> points) where T : SplinePoint
         {
             if (points.Count > 4) throw new System.ArgumentException("");
 
@@ -126,18 +126,18 @@ namespace UnitySplines
         public static Vector3 Evaluate(float t, int order, Matrix4x4 characteristicMatrix, Matrix4x4 pointMatrix) => (CreateTMatrix(t, order) * characteristicMatrix * pointMatrix).GetRow(0);
         public static Vector3 Evaluate(float t, int order, Matrix4x4 characteristicMatrix, params Vector3[] points) => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
         public static Vector3 Evaluate(float t, int order, Matrix4x4 characteristicMatrix, IList<Vector3> points) => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
-        public static Vector3 Evaluate<T>(float t, int order, Matrix4x4 characteristicMatrix, params T[] points) where T : SplinePointBase => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
-        public static Vector3 Evaluate<T>(float t, int order, Matrix4x4 characteristicMatrix, IList<T> points) where T : SplinePointBase => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
+        public static Vector3 Evaluate<T>(float t, int order, Matrix4x4 characteristicMatrix, params T[] points) where T : SplinePoint => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
+        public static Vector3 Evaluate<T>(float t, int order, Matrix4x4 characteristicMatrix, IList<T> points) where T : SplinePoint => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
         #endregion
 
-        public static Bounds GetBounds<T>(ISplineGenerator generator, IList<T> points) where T : SplinePointBase => GetBounds(generator, SplinePointsToVector(points));
+        public static Bounds GetBounds<T>(ISplineGenerator generator, IList<T> points) where T : SplinePoint => GetBounds(generator, SplinePointsToVector(points));
         public static Bounds GetBounds(ISplineGenerator generator, IList<Vector3> points)
         {
             SplineExtrema extrema = GetExtrema(generator, points);
             return new Bounds((extrema.Maxima + extrema.Minima) / 2, extrema.Maxima - extrema.Minima);
         }
 
-        public static SplineExtrema GetExtrema<T>(ISplineGenerator generator, IList<T> points) where T : SplinePointBase => GetExtrema(generator, SplinePointsToVector(points));
+        public static SplineExtrema GetExtrema<T>(ISplineGenerator generator, IList<T> points) where T : SplinePoint => GetExtrema(generator, SplinePointsToVector(points));
         public static SplineExtrema GetExtrema(ISplineGenerator generator, IList<Vector3> points)
         {
             SplineExtrema extrema = new SplineExtrema();
@@ -149,7 +149,7 @@ namespace UnitySplines
             return extrema;
         }
 
-        public static IReadOnlyList<Vector3> GetFlattened<T>(int accuracy, ISplineGenerator generator, IList<T> points) where T : SplinePointBase => GetFlattened(accuracy, generator, SplinePointsToVector(points));
+        public static IReadOnlyList<Vector3> GetFlattened<T>(int accuracy, ISplineGenerator generator, IList<T> points) where T : SplinePoint => GetFlattened(accuracy, generator, SplinePointsToVector(points));
         public static IReadOnlyList<Vector3> GetFlattened(int accuracy, ISplineGenerator generator, IList<Vector3> points)
         {
             if (accuracy < 1) throw new System.ArgumentOutOfRangeException();
@@ -162,7 +162,7 @@ namespace UnitySplines
             return flattened.AsReadOnly();
         }
 
-        public static float GetLength<T>(int accuracy, ISplineGenerator generator, IList<T> points) where T : SplinePointBase => GetLength(accuracy, generator, SplinePointsToVector(points));
+        public static float GetLength<T>(int accuracy, ISplineGenerator generator, IList<T> points) where T : SplinePoint => GetLength(accuracy, generator, SplinePointsToVector(points));
         public static float GetLength(int accuracy, ISplineGenerator generator, IList<Vector3> points)
         {
             if (accuracy < 1) throw new System.ArgumentOutOfRangeException();
@@ -175,7 +175,7 @@ namespace UnitySplines
             return length;
         }
 
-        public static IReadOnlyList<float> GetDistanceLUT<T>(int accuracy, ISplineGenerator generator, IList<T> points, float startingDistance) where T : SplinePointBase => GetDistanceLUT(accuracy, generator, SplinePointsToVector(points), startingDistance);
+        public static IReadOnlyList<float> GetDistanceLUT<T>(int accuracy, ISplineGenerator generator, IList<T> points, float startingDistance) where T : SplinePoint => GetDistanceLUT(accuracy, generator, SplinePointsToVector(points), startingDistance);
         public static IReadOnlyList<float> GetDistanceLUT(int accuracy, ISplineGenerator generator, IList<Vector3> points, float startingDistance = 0)
         {
             if (accuracy < 1) throw new System.ArgumentOutOfRangeException();
@@ -195,7 +195,7 @@ namespace UnitySplines
             return distances.AsReadOnly();
         }
 
-        public static IReadOnlyList<FrenetFrame> GenerateFrenetFrames<T>(int accuracy, ISplineGenerator generator, IList<T> points, FrenetFrame? initialOrientation = null) where T : SplinePointBase => GenerateFrenetFrames(accuracy, generator, SplinePointsToVector(points), initialOrientation);
+        public static IReadOnlyList<FrenetFrame> GenerateFrenetFrames<T>(int accuracy, ISplineGenerator generator, IList<T> points, FrenetFrame? initialOrientation = null) where T : SplinePoint => GenerateFrenetFrames(accuracy, generator, SplinePointsToVector(points), initialOrientation);
         public static IReadOnlyList<FrenetFrame> GenerateFrenetFrames(int accuracy, ISplineGenerator generator, IList<Vector3> points, FrenetFrame? initialOrientation = null)
         {
             float step = 1f / accuracy;
