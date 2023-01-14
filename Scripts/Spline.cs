@@ -17,10 +17,14 @@ namespace UnitySplines
         public virtual void SetGenerator(ISplineGenerator generator)
         {
             if (generator == _generator) return;
-            _generator = generator;
 
+            if (PointCount < generator.SegmentSize) return;
+
+            _generator = generator;
             _pointPositions.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
             _pointNormals.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
+
+            ClearCache();
         }
 
         public void SetSpace(SplineSpace newSpace)
@@ -141,11 +145,15 @@ namespace UnitySplines
         public override void SetGenerator(ISplineGenerator generator)
         {
             if (generator == _generator) return;
-            _generator = generator;
 
-            _pointPositions.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
-            _pointNormals.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
-            _pointData.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
+            if (PointCount < generator.SegmentSize) return;
+
+            _generator = generator;
+            _pointPositions.SetSegmentSizes(generator.SegmentSize, generator.SlideSize);
+            _pointNormals.SetSegmentSizes(generator.SegmentSize, generator.SlideSize);
+            _pointData.SetSegmentSizes(generator.SegmentSize, generator.SlideSize);
+
+            ClearCache();
         }
 
         [SerializeField] protected SegmentedCollection<T> _pointData;

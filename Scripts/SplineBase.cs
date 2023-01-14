@@ -7,6 +7,7 @@ namespace UnitySplines
     [System.Serializable]
     public abstract class SplineBase
     {
+        public string Generator => _generator.GeneratorType;
         public int Accuracy => _accuracy;
         public SplineSpace Space => _space;
 
