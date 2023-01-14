@@ -128,10 +128,10 @@ namespace UnitySplines
 
             foreach (var extremaT in _generator.GetExtremaTs(_pointPositions.Segment(segmentIndex)))
             {
-                extrema.InsertValueT(segmentIndex + extremaT, this);
+                extrema.InsertValueT(extremaT, segmentIndex, this);
             }
-            extrema.InsertValueT(segmentIndex, this);
-            extrema.InsertValueT(segmentIndex + 1, this);
+            extrema.InsertValueT(0, segmentIndex, this);
+            extrema.InsertValueT(1, segmentIndex, this);
 
             if (_cacher != null) _cacher[segmentIndex].Extrema = extrema;
             return extrema;

@@ -26,20 +26,13 @@ namespace UnitySplines
             }
         }
 
-        public void InsertValue(float t, ISplineGenerator generator, IList<Vector3> points)
+        public void InsertValueT(float segmentT, int segmentIndex, SplineBase spline) => InsertValueT(segmentT, spline.Generator, spline.SegmentPositions(segmentIndex));
+        public void InsertValueT(float t, ISplineGenerator generator, IList<Vector3> points)
         {
             if (maxima == null) Clear();
-            if (t > ((points.Count - generator.SegmentSize) / generator.SlideSize + 1) || t < 0 || float.IsNaN(t)) return;
+            if (t > 1 || t < 0 || float.IsNaN(t)) return;
 
             InsertValueImpl(generator.Evaluate(t, points));
-        }
-
-        public void InsertValueT(float t, SplineBase spline)
-        {
-            if (maxima == null) Clear();
-            if (t > spline.SegmentCount || t < 0 || float.IsNaN(t)) return;
-
-            InsertValueImpl(spline.ValueAt(t));
         }
 
         public void Clear()
