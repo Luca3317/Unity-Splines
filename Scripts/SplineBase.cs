@@ -8,6 +8,7 @@ namespace UnitySplines
     public abstract class SplineBase
     {
         public int Accuracy => _accuracy;
+        public SplineSpace Space => _space;
 
         #region SplinePoints Property Wrappers
         public int SegmentSize => _generator.SegmentSize;
@@ -264,6 +265,7 @@ namespace UnitySplines
         [SerializeField] protected SegmentedCollection<float> _pointNormals;
         [SerializeField] protected ISplineGenerator _generator;
         [SerializeField] protected SplineCacher _cacher;
+        [SerializeField] protected SplineSpace _space;
         [SerializeField] protected int _accuracy = 20;
 
         protected virtual void InitSpline(ISplineGenerator generator, bool cache, IEnumerable<SplinePoint> points)
@@ -286,6 +288,8 @@ namespace UnitySplines
                 _cacher = new SplineCacher();
                 for (int i = 0; i < SegmentCount; i++) _cacher.Add();
             }
+
+            _space = SplineSpace.XYZ;
         }
 
         protected virtual void AddRange(ICollection<SplinePoint> points)
@@ -435,8 +439,6 @@ namespace UnitySplines
             if (_cacher != null && accuracy == _accuracy) _cacher[segmentIndex].Frames = roFrames;
             return roFrames;
         }
-
-        private IList<Vector3> _positionBuffer = new List<Vector3>();
 
         // testing
         public void ClearCache()

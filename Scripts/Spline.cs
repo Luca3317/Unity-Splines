@@ -14,6 +14,26 @@ namespace UnitySplines
         public Spline(ISplineGenerator generator, bool cache, SegmentedCollection<SplinePoint> points) : base(generator, cache, points)
         { }
 
+        public virtual void SetGenerator(ISplineGenerator generator)
+        {
+            if (generator == _generator) return;
+            _generator = generator;
+
+            _pointPositions.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
+            _pointNormals.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
+        }
+
+        public void SetSpace(SplineSpace newSpace)
+        {
+            if (_space == newSpace) return;
+
+            for (int i = 0; i < PointCount; i++)
+                _pointPositions.SetItem(i, SplineHelper.ConvertToSpace(_pointPositions.Item(i), _space, newSpace));
+
+            ClearCache();
+            _space = newSpace;
+        }
+
         public void SetPoint(int pointIndex, SplinePoint newPoint)
         {
             SetPointNormalAngle(pointIndex, newPoint.NormalAngle);
@@ -22,7 +42,7 @@ namespace UnitySplines
 
         public void SetPointPosition(int pointIndex, Vector3 newPosition)
         {
-            _pointPositions.SetItem(pointIndex, newPosition);
+            _pointPositions.SetItem(pointIndex, SplineHelper.ConvertToSpace(newPosition, SplineSpace.XYZ, _space));
 
             if (_cacher != null)
             {
@@ -103,16 +123,6 @@ namespace UnitySplines
         /// <exception cref="InvalidOperationException">Thrown if the collection does not contain at least two segments. It must always contain at least one full segment.</exception>
         public void DeleteSegment(int segmentIndex) => Remove(segmentIndex);
         #endregion
-
-        public virtual void SetGenerator(ISplineGenerator generator)
-        {
-            if (generator == _generator) return;
-            _generator = generator;
-
-            // todo might have to make this function virtual; has to resize points normals and in one case data
-            _pointPositions.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
-            _pointNormals.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
-        }
     }
 
     [System.Serializable]
@@ -133,9 +143,9 @@ namespace UnitySplines
             if (generator == _generator) return;
             _generator = generator;
 
-            // todo might have to make this function virtual; has to resize points normals and in one case data
             _pointPositions.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
             _pointNormals.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
+            _pointData.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
         }
 
         [SerializeField] protected SegmentedCollection<T> _pointData;
@@ -163,6 +173,8 @@ namespace UnitySplines
                 _cacher = new SplineCacher();
                 for (int i = 0; i < SegmentCount; i++) _cacher.Add();
             }
+
+            _space = SplineSpace.XYZ;
         }
 
         protected override void AddRange(ICollection<SplinePoint> points)

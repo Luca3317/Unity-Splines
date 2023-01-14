@@ -51,6 +51,8 @@ namespace UnitySplines
                 _cacher = new SplineCacher();
                 for (int i = 0; i < SegmentCount; i++) _cacher.Add();
             }
+
+            _space = SplineSpace.XYZ;
         }
 
         [SerializeField] protected SegmentedCollection<T> _pointData;

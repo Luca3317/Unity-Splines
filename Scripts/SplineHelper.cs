@@ -36,6 +36,40 @@ namespace UnitySplines
         /// <returns>The index of the first point contained in this segment.</returns>
         public static int SegmentToPointIndex(int segmentIndex, int segmentSize, int slideSize) => slideSize * segmentIndex;
 
+        public static Vector3 ConvertToSpace(Vector3 vec, SplineSpace currentSpace, SplineSpace newSpace)
+        {
+            if (newSpace == currentSpace) return vec;
+
+            Vector3 newPosition = vec;
+            if (newSpace == SplineSpace.XY)
+            {
+                if (currentSpace == SplineSpace.XYZ)
+                {
+                    newPosition.z = 0f;
+                }
+                else
+                {
+                    newPosition.y = vec.z;
+                    newPosition.z = 0f;
+                }
+            }
+            else if (newSpace == SplineSpace.XZ)
+            {
+                if (currentSpace == SplineSpace.XYZ)
+                {
+                    newPosition.y = 0f;
+                }
+                else
+                {
+                    newPosition.z = vec.y;
+                    newPosition.y = 0f;
+                }
+            }
+
+            Debug.Log("Setting " + vec + " to " + newPosition + " ( " + currentSpace + " to " + newSpace + " )");
+
+            return newPosition; 
+        }
 
         public static IList<Vector3> SplinePointsToVector(IList<SplinePoint> points)
         {
@@ -140,7 +174,7 @@ namespace UnitySplines
             List<Vector3> flattened = new List<Vector3>();
             //flattened.Add(points[0]);
             for (int i = 0; i < accuracy; i++)
-                flattened.Add(generator.Evaluate((float)i / (accuracy-1), points));
+                flattened.Add(generator.Evaluate((float)i / (accuracy - 1), points));
 
             return flattened.AsReadOnly();
         }
