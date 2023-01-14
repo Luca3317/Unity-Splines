@@ -77,7 +77,7 @@ namespace UnitySplines
             // TODO this will throw an error if actually adding more than one segment
             if (_cacher != null)
             {
-                _cacher.Add(SegmentCount - 1);
+                _cacher.Insert(SegmentCount - 1);
             }
         }
 
@@ -100,7 +100,7 @@ namespace UnitySplines
 
             if (_cacher != null)
             {
-                _cacher.Add(SegmentCount - 1);
+                _cacher.Insert(SegmentCount - 1);
             }
         }
 
@@ -123,7 +123,7 @@ namespace UnitySplines
 
             if (_cacher != null)
             {
-                _cacher.Add(i);
+                _cacher.Insert(i);
             }
         }
 
@@ -146,7 +146,7 @@ namespace UnitySplines
 
             if (_cacher != null)
             {
-                _cacher.Add(i);
+                _cacher.Insert(i);
             }
         }
 
@@ -154,7 +154,7 @@ namespace UnitySplines
         {
             if (_cacher != null)
             {
-                _cacher.Remove(i);
+                _cacher.RemoveAt(i);
             }
             _pointPositions.RemoveAtSegment(i);
             _pointNormals.RemoveAtSegment(i);

@@ -17,14 +17,16 @@ namespace UnitySplines
         public virtual void SetGenerator(ISplineGenerator generator)
         {
             if (generator == _generator) return;
-
             if (PointCount < generator.SegmentSize) return;
 
             _generator = generator;
             _pointPositions.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
             _pointNormals.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
-
-            ClearCache();
+            if (_cacher != null)
+            {
+                _cacher.SetSize(SegmentCount);
+                ClearCache();
+            }
         }
 
         public void SetSpace(SplineSpace newSpace)
@@ -150,15 +152,17 @@ namespace UnitySplines
         public override void SetGenerator(ISplineGenerator generator)
         {
             if (generator == _generator) return;
-
             if (PointCount < generator.SegmentSize) return;
 
             _generator = generator;
             _pointPositions.SetSegmentSizes(generator.SegmentSize, generator.SlideSize);
             _pointNormals.SetSegmentSizes(generator.SegmentSize, generator.SlideSize);
             _pointData.SetSegmentSizes(generator.SegmentSize, generator.SlideSize);
-
-            ClearCache();
+            if (_cacher != null)
+            {
+                _cacher.SetSize(SegmentCount);
+                ClearCache();
+            }
         }
 
         [SerializeField] protected SegmentedCollection<T> _pointData;
@@ -210,7 +214,7 @@ namespace UnitySplines
             // TODO this will throw an error if actually adding more than one segment
             if (_cacher != null)
             {
-                _cacher.Add(SegmentCount - 1);
+                _cacher.Insert(SegmentCount - 1);
             }
         }
 
@@ -233,7 +237,7 @@ namespace UnitySplines
 
             if (_cacher != null)
             {
-                _cacher.Add(SegmentCount - 1);
+                _cacher.Insert(SegmentCount - 1);
             }
         }
 
@@ -256,7 +260,7 @@ namespace UnitySplines
 
             if (_cacher != null)
             {
-                _cacher.Add(i);
+                _cacher.Insert(i);
             }
         }
 
@@ -279,7 +283,7 @@ namespace UnitySplines
 
             if (_cacher != null)
             {
-                _cacher.Add(i);
+                _cacher.Insert(i);
             }
         }
 
@@ -287,7 +291,7 @@ namespace UnitySplines
         {
             if (_cacher != null)
             {
-                _cacher.Remove(i);
+                _cacher.RemoveAt(i);
             }
             _pointPositions.RemoveAtSegment(i);
             _pointNormals.RemoveAtSegment(i);

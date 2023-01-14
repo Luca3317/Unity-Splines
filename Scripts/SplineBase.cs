@@ -356,7 +356,7 @@ namespace UnitySplines
             // TODO this will throw an error if actually adding more than one segment
             if (_cacher != null)
             {
-                _cacher.Add(SegmentCount - 1);
+                _cacher.Insert(SegmentCount - 1);
             }
         }
 
@@ -376,7 +376,7 @@ namespace UnitySplines
 
             if (_cacher != null)
             {
-                _cacher.Add(SegmentCount - 1);
+                _cacher.Insert(SegmentCount - 1);
             }
         }
 
@@ -396,7 +396,7 @@ namespace UnitySplines
 
             if (_cacher != null)
             {
-                _cacher.Add(i);
+                _cacher.Insert(i);
             }
         }
 
@@ -416,7 +416,7 @@ namespace UnitySplines
 
             if (_cacher != null)
             {
-                _cacher.Add(i);
+                _cacher.Insert(i);
             }
         }
 
@@ -424,7 +424,7 @@ namespace UnitySplines
         {
             if (_cacher != null)
             {
-                _cacher.Remove(i);
+                _cacher.RemoveAt(i);
             }
             _pointPositions.RemoveAtSegment(i);
             _pointNormals.RemoveAtSegment(i);
@@ -438,8 +438,6 @@ namespace UnitySplines
         private IReadOnlyList<float> GenerateDistanceLUT(int accuracy = -1)
         {
             if (_cacher != null && _cacher.Distances.Count >= accuracy) return _cacher.Distances;
-
-            Debug.Log("Calculating distance lut");
 
             IReadOnlyList<Vector3> flattened = GetFlattened(accuracy);
             List<float> distances = new List<float>();

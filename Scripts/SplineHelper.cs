@@ -175,10 +175,10 @@ namespace UnitySplines
         {
             SplineExtrema extrema = new SplineExtrema();
             foreach (var extremaT in generator.GetExtremaTs(points))
-                extrema.InsertValue(extremaT, generator, points);
+                extrema.InsertValueT(extremaT, generator, points);
 
-            extrema.InsertValue(0, generator, points);
-            extrema.InsertValue(1, generator, points);
+            extrema.InsertValueT(0, generator, points);
+            extrema.InsertValueT(1, generator, points);
             return extrema;
         }
 
