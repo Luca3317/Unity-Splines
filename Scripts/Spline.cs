@@ -38,6 +38,11 @@ namespace UnitySplines
             _space = newSpace;
         }
 
+        public void SetNormalAngleOffset(float newNormalAngleOffset)
+        {
+            _normalAngleOffset = newNormalAngleOffset % 360;
+        }
+
         public void SetPoint(int pointIndex, SplinePoint newPoint)
         {
             SetPointNormalAngle(pointIndex, newPoint.NormalAngle);

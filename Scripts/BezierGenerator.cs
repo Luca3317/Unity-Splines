@@ -57,6 +57,12 @@ namespace UnitySplines.Bezier
             return GetExtremaTs(points[0], points[1], points[2], points[3]);
         }
 
+        public float GetNormalsModifier(Vector3 normal, float t, IList<float> normalAngleOffsets)
+        {
+            if (normalAngleOffsets.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, normalAngleOffsets.Count, _generatorType, _segmentSize));
+            return SplineHelper.GetNormalsModifier(t, _characteristicMatrix, normalAngleOffsets);
+        }
+
         private const int _segmentSize = 4;
         private const int _slideSize = 3;
         private const string _generatorType = "Bezier";

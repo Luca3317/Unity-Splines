@@ -136,7 +136,7 @@ namespace UnitySplines
         public static Matrix4x4 CreatePointMatrix(params Vector3[] points) => CreatePointMatrix((IList<Vector3>)points);
         public static Matrix4x4 CreatePointMatrix(IList<Vector3> points)
         {
-            if (points.Count > 4) throw new System.ArgumentException("");
+            if (points.Count > 4) throw new System.ArgumentException();
 
             Matrix4x4 pMatrix = new Matrix4x4();
             for (int i = 0; i < points.Count; i++)
@@ -145,9 +145,24 @@ namespace UnitySplines
             return pMatrix;
         }
 
+        public static Matrix4x4 CreateNormalAngleOffsetMatrix(params float[] normalAngles) => CreateNormalAngleOffsetMatrix((IList<float>)normalAngles); 
+        public static Matrix4x4 CreateNormalAngleOffsetMatrix(IList<float> normalAngles)
+        {
+            if (normalAngles.Count > 4) throw new System.ArgumentException();
+
+            Matrix4x4 naMatrix = new Matrix4x4();
+            for (int i = 0; i < normalAngles.Count; i++)
+                naMatrix[i, 0] = normalAngles[i];
+
+            return naMatrix;
+        }
+
         public static Vector3 Evaluate(float t, int order, Matrix4x4 characteristicMatrix, Matrix4x4 pointMatrix) => (CreateTMatrix(t, order) * characteristicMatrix * pointMatrix).GetRow(0);
         public static Vector3 Evaluate(float t, int order, Matrix4x4 characteristicMatrix, params Vector3[] points) => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
         public static Vector3 Evaluate(float t, int order, Matrix4x4 characteristicMatrix, IList<Vector3> points) => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
+
+        public static float GetNormalsModifier(float t, Matrix4x4 characteristicMatrix, params float[] normalAngles) => (CreateTMatrix(t, 0) * characteristicMatrix * CreateNormalAngleOffsetMatrix(normalAngles))[0,0];
+        public static float GetNormalsModifier(float t, Matrix4x4 characteristicMatrix, IList<float> normalAngles) => (CreateTMatrix(t, 0) * characteristicMatrix * CreateNormalAngleOffsetMatrix(normalAngles))[0,0];
         #endregion
 
         public static Bounds GetBounds(ISplineGenerator generator, IList<Vector3> points)

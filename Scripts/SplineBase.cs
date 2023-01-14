@@ -10,6 +10,7 @@ namespace UnitySplines
         public string Generator => _generator.GeneratorType;
         public int Accuracy => _accuracy;
         public SplineSpace Space => _space;
+        public float NormalAngleOffset => _normalAngleOffset;
 
         #region SplinePoints Property Wrappers
         public int SegmentSize => _generator.SegmentSize;
@@ -49,6 +50,47 @@ namespace UnitySplines
 
             ListSegment<Vector3> segment = _pointPositions.Segment(segmentIndex);
             return _generator.EvaluateDerivative(segmentT, 1, segment);
+        }
+
+        public Vector3 NormalAt(float t, bool alignNormalsToCurveOrientation = false, FrenetFrame? initialOrientation = null)
+            => NormalAt(t, _accuracy, alignNormalsToCurveOrientation, initialOrientation);
+        public Vector3 NormalAt(float t, int accuracy, bool alignNormalsToCurveOrientation = false, FrenetFrame? initialOrientation = null)
+        {
+            Vector3 tangent = TangentAt(t);
+            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
+            float xt, zt, yt;
+
+            Vector3 normal;
+            switch (_space)
+            {
+                case SplineSpace.XY:
+                    xt = tangent.x / tangent.magnitude;
+                    yt = tangent.y / tangent.magnitude;
+                    normal = new Vector3(yt, -xt, 0f);
+                    float normalModifier = _generator.GetNormalsModifier(normal, t, _pointNormals.Segment(segmentIndex));
+                    return Quaternion.AngleAxis((_normalAngleOffset + normalModifier) % 360, tangent) * normal;
+
+                case SplineSpace.XZ:
+                    xt = tangent.x / tangent.magnitude;
+                    zt = tangent.z / tangent.magnitude;
+                    normal = new Vector3(-zt, 0f, xt);
+                    normalModifier = _generator.GetNormalsModifier(normal, t, _pointNormals.Segment(segmentIndex));
+                    return Quaternion.AngleAxis((_normalAngleOffset + normalModifier) % 360, tangent) * normal;
+
+                default:
+
+                    if (alignNormalsToCurveOrientation)
+                    {
+                        normal = GetFrenetFrameAt(t, accuracy).normal; // t, accuracy, initialOrientation
+                    }
+                    else
+                    {
+                        normal = Vector3.Cross(Vector3.up, tangent);
+                    }
+
+                    normalModifier = _generator.GetNormalsModifier(normal, t, _pointNormals.Segment(segmentIndex));
+                    return Quaternion.AngleAxis((_normalAngleOffset + normalModifier) % 360, tangent) * normal;
+            }
         }
 
         public Bounds GetBounds()
@@ -200,6 +242,7 @@ namespace UnitySplines
             };
         }
 
+        public float DistanceToT(float distance) => DistanceToT(distance, _accuracy);
         public float DistanceToT(float distance, int accuracy)
         {
             if (distance == 0) return 0;
@@ -264,10 +307,13 @@ namespace UnitySplines
 
         [SerializeField] protected SegmentedCollection<Vector3> _pointPositions;
         [SerializeField] protected SegmentedCollection<float> _pointNormals;
+
         [SerializeField] protected ISplineGenerator _generator;
         [SerializeField] protected SplineCacher _cacher;
+
         [SerializeField] protected SplineSpace _space;
         [SerializeField] protected int _accuracy = 20;
+        [SerializeField] protected float _normalAngleOffset;
 
         protected virtual void InitSpline(ISplineGenerator generator, bool cache, IEnumerable<SplinePoint> points)
         {

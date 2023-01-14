@@ -22,6 +22,8 @@ namespace UnitySplines
         public IList<float> GetExtremaTs(params Vector3[] points) => GetExtremaTs((IList<Vector3>)points);
         public IList<float> GetExtremaTs(IList<Vector3> points);
 
+        public float GetNormalsModifier(Vector3 normal, float t, IList<float> normalAngleOffsets) => 0f;
+
         protected const string _pointAmountErrorMessage = "The passed in amount of points ({0}) does not constitute exactly one {1} segment (required amount: {2})";
     }
 }
