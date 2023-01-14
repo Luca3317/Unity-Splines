@@ -7,47 +7,22 @@ using System;
 namespace UnitySplines
 {
     [System.Serializable]
-    public class SplinePoint<T> : SplinePoint
-    {
-        public T Data => _data;
-
-        public SplinePoint(Vector3 position, T data) : base(position)
-        {
-            _data = data;
-        }
-
-        [SerializeField] private T _data;
-    }
-
-    [System.Serializable]
-    public class SplinePoint : INotifyPropertyChanged
+    public struct SplinePoint
     {
         public Vector3 Position => _position;
+        public float NormalAngle => _normalAngle;
 
-        public float x => Position.x;
-        public float y => Position.y;
-        public float z => Position.z;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public SplinePoint(Vector3 position)
+        public SplinePoint(Vector3 position) : this(position, 0f)
+        { }
+        public SplinePoint(float normalAngle) : this(Vector3.zero, normalAngle)
+        { }
+        public SplinePoint(Vector3 position, float normalAngle)
         {
             _position = position;
+            _normalAngle = normalAngle;
         }
 
-        public void SetPosition(Vector3 newPosition)
-        {
-            if (newPosition == _position) return;
-
-            _position = newPosition;
-            NotifyPropertyChanged("Position");
-        }
-
-        protected void NotifyPropertyChanged(string propertyName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        [SerializeField] private Vector3 _position;
+        [SerializeField] Vector3 _position;
+        [SerializeField] float _normalAngle;
     }
 }

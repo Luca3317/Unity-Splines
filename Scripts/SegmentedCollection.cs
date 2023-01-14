@@ -40,6 +40,11 @@ namespace UnitySplines
         /// </summary>
         public int ItemCount => _items.Count;
         /// <summary>
+        /// Return the amount of segments in the collection.
+        /// </summary>
+        public int SegmentCount => _items.Count >= _segmentSize ? (_items.Count - _segmentSize) / _slideSize + 1 : 0;
+
+        /// <summary>
         /// Returns the item at index i of the collection.
         /// </summary>
         /// <param name="i">The index of the item to return.</param>
@@ -51,23 +56,32 @@ namespace UnitySplines
         public IEnumerable<T> Items => _items.AsReadOnly();
 
         /// <summary>
-        /// Return the amount of segments in the collection.
-        /// </summary>
-        public int SegmentCount => _items.Count >= _segmentSize ? (_items.Count - _segmentSize) / _slideSize + 1 : 0;
-        /// <summary>
         /// Returns the i-th segment in the collection.
         /// </summary>
-        /// <param name="i"></param>
+        /// <param name="segmentIndex"></param>
         /// <returns></returns>
-        public IList<T> Segment(int i) => i == 0 ? _items.GetRange(0, _segmentSize) : _items.GetRange(_segmentSize - 1 + (i - 1) * _slideSize, _segmentSize); // TODO test this
+        public ListSegment<T> Segment(int segmentIndex)
+        {
+            return new ListSegment<T>(_items, SplineHelper.SegmentToPointIndex(segmentIndex, _segmentSize, _slideSize), _segmentSize);
+        }
         /// <summary>
         /// Returns all segments in the collection as an IEnumerable.
         /// </summary>
-        public IEnumerable<IList<T>> Segments { get { for (int i = 0; i < SegmentCount; i++) yield return Segment(i); } }
+        public IEnumerable<ListSegment<T>> Segments { get { for (int i = 0; i < SegmentCount; i++) yield return Segment(i); } }
+
+        [System.Runtime.CompilerServices.IndexerName("MyItem")]
+        public ListSegment<T> this[int segmentIndex] => Segment(segmentIndex);
+        [System.Runtime.CompilerServices.IndexerName("MyItem")]
+        public T this[int segmentIndex, int pointIndex] => _items[SplineHelper.SegmentToPointIndex(segmentIndex, _segmentSize, _slideSize) + pointIndex];
 
         public SegmentedCollection(int segmentSize, int slideSize, IEnumerable<T> items) => Init(segmentSize, slideSize, items);
         public SegmentedCollection(int segmentSize, int slideSize, params T[] items) => Init(segmentSize, slideSize, items);
         public SegmentedCollection(int segmentSize, int slideSize, SegmentedCollection<T> items) => Init(segmentSize, slideSize, items._items.GetRange(0, items._items.Count - (items._items.Count - segmentSize) % slideSize));
+
+        public void SetItem(int itemIndex, T newItem)
+        {
+            _items[itemIndex] = newItem;
+        }
 
         public void Add(ICollection<T> items)
         {
@@ -133,6 +147,7 @@ namespace UnitySplines
         }
 
         public int IndexOf(T item) => _items.IndexOf(item);
+        public IEnumerable<int> SegmentIndecesOf(int itemIndex) => SegmentIndecesOf(_items[itemIndex]);
         public IEnumerable<int> SegmentIndecesOf(T item)
         {
             // TODO: Rename and move some functions from SplineHelper to more general helper class
@@ -179,7 +194,7 @@ namespace UnitySplines
             if (segmentSize < slideSize) throw new System.ArgumentException(string.Format(_segmentSizeSmallerThanSlideErrorMsg));
             if (_items.Count < segmentSize) throw new System.ArgumentException(string.Format(_tooFewItemsToCreateErrorMsg, _items.Count, segmentSize));
             if ((_items.Count - segmentSize) % slideSize != 0) throw new System.ArgumentException(string.Format(_incompatibleAmountOfItemsErrorMsg, _items.Count, segmentSize, slideSize));
-            
+
             _segmentSize = segmentSize;
             _slideSize = slideSize;
         }

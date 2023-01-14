@@ -26,7 +26,6 @@ namespace UnitySplines
             }
         }
 
-        public void InsertValue<T>(float t, ISplineGenerator generator, IList<T> points) where T : SplinePoint => InsertValue(t, generator, SplineHelper.SplinePointsToVector(points));
         public void InsertValue(float t, ISplineGenerator generator, IList<Vector3> points)
         {
             if (maxima == null) Clear();
@@ -35,7 +34,7 @@ namespace UnitySplines
             InsertValueImpl(generator.Evaluate(t, points));
         }
 
-        public void InsertValueT<T>(float t, Spline<T> spline) where T: SplinePoint
+        public void InsertValueT(float t, SplineBase spline)
         {
             if (maxima == null) Clear();
             if (t > spline.SegmentCount || t < 0 || float.IsNaN(t)) return;
