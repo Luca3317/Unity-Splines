@@ -289,17 +289,6 @@ namespace UnitySplines
             return num / dnm;
         }
 
-        public void SplitAt(float t)
-        {
-            (int segmentIndex, float segmentT) = SplineUtility.PercentageToSegmentPercentage(t);
-
-            IList<Vector3> newSegments = _generator.SplitSegment(segmentT, _pointPositions.Segment(segmentIndex));
-            newSegments.RemoveAt(newSegments.Count - 1);
-
-            InsertRange(segmentIndex, newSegments);
-            Remove(segmentIndex + 2);
-        }
-
         #region Intersection
         public bool Intersects(SplineBase spline, int accuracy)
             => SplineUtility.SplineSplineIntersect(this, spline, accuracy);

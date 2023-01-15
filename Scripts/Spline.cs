@@ -74,6 +74,16 @@ namespace UnitySplines
             _pointNormals.SetItem(pointIndex, newNormalAngle);
         }
 
+        public void SplitAt(float t)
+        {
+            (int segmentIndex, float segmentT) = SplineUtility.PercentageToSegmentPercentage(t);
+
+            IList<Vector3> newSegments = _generator.SplitSegment(segmentT, _pointPositions.Segment(segmentIndex));
+            newSegments.RemoveAt(newSegments.Count - 1);
+            InsertRange(segmentIndex, newSegments);
+            Remove(segmentIndex + 2);
+        }
+
         #region SplinePoints Method Wrappers
         /// <summary>
         /// Appends a new segment to the end of the collection.
