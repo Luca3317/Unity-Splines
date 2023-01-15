@@ -273,5 +273,385 @@ namespace UnitySplines
 
             return frame;
         }
+
+
+        #region Intersections
+        public static bool LinesIntersect(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, SplineSpace dimension)
+            => LinesIntersect(start1, end1, start2, end2, dimension, MathUtility.defaultIntersectionEpsilon);
+        public static bool LinesIntersect(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, float epsilon)
+            => LinesIntersect(start1, end1, start2, end2, null, epsilon);
+
+        public static bool LinesIntersect(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            if (dimension == null) dimension = GetSpaceOf(start1, end1, start2, end2);
+
+            switch (dimension)
+            {
+                case SplineSpace.XY:
+                    return (start1.x - end1.x) * (start2.y - end2.y) - (start1.y - end1.y) * (start2.x - end2.x) != 0;
+                case SplineSpace.XZ:
+                    return (start1.x - end1.x) * (start2.z - end2.z) - (start1.z - end1.z) * (start2.z - end2.z) != 0;
+                default:
+                    var res = MathUtility.LinesIntersection3D(start1, end1, start2, end2);
+                    return res.Item1;
+            }
+        }
+
+        public static bool LineSegmentsIntersect(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, SplineSpace dimension)
+            => LineSegmentsIntersect(start1, end1, start2, end2, dimension, MathUtility.defaultIntersectionEpsilon);
+        public static bool LineSegmentsIntersect(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, float epsilon)
+            => LineSegmentsIntersect(start1, end1, start2, end2, null, epsilon);
+
+        public static bool LineSegmentsIntersect(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            if (dimension == null) dimension = GetSpaceOf(start1, end1, start2, end2);
+
+            switch (dimension)
+            {
+                case SplineSpace.XY:
+                    float d = (end2.x - start2.x) * (start1.y - end1.y) - (start1.x - end1.x) * (end2.y - start2.y);
+                    if (d == 0) return false;
+                    float t = ((start2.y - end2.y) * (start1.x - start2.x) + (end2.x - start2.x) * (start1.y - start2.y)) / d;
+                    float u = ((start1.y - end1.y) * (start1.x - start2.x) + (end1.x - start1.x) * (start1.y - start2.y)) / d;
+                    return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+                case SplineSpace.XZ:
+                    d = (end2.x - start2.x) * (start1.z - end1.z) - (start1.x - end1.x) * (end2.z - start2.z);
+                    if (d == 0) return false;
+                    t = ((start2.z - end2.z) * (start1.x - start2.x) + (end2.x - start2.x) * (start1.z - start2.z)) / d;
+                    u = ((start1.z - end1.z) * (start1.x - start2.x) + (end1.x - start1.x) * (start1.z - start2.z)) / d;
+                    return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+                default:
+                    var res = MathUtility.LinesIntersection3D(start1, end1, start2, end2);
+
+                    return res.Item1 && (res.Item3 - res.Item2).magnitude < epsilon && MathUtility.IsBetween(start1, end1, res.Item2, epsilon) && MathUtility.IsBetween(start2, end2, res.Item3, epsilon);
+            }
+        }
+
+        public static (bool, Vector3) LinesIntersectionPoint(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, SplineSpace dimension)
+            => LinesIntersectionPoint(start1, end1, start2, end2, dimension, MathUtility.defaultIntersectionEpsilon);
+        public static (bool, Vector3) LinesIntersectionPoint(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, float epsilon)
+            => LinesIntersectionPoint(start1, end1, start2, end2, null, epsilon);
+
+        public static (bool, Vector3) LinesIntersectionPoint(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            if (dimension == null) dimension = GetSpaceOf(start1, end1, start2, end2);
+
+            float d, t, n;
+            switch (dimension)
+            {
+                case SplineSpace.XY:
+                    d = (start1.x - end1.x) * (start2.y - end2.y) - (start1.y - end1.y) * (start2.x - end2.x);
+                    if (d == 0) return (false, Vector3.zero);
+                    n = (start1.x - start2.x) * (start2.y - end2.y) - (start1.y - start2.y) * (start2.x - end2.x);
+                    t = n / d;
+                    return (true, start1 + (end1 - start1) * t);
+                case SplineSpace.XZ:
+                    d = (start1.x - end1.x) * (start2.z - end2.z) - (start1.z - end1.z) * (start2.x - end2.x);
+                    if (d == 0) return (false, Vector3.zero);
+                    n = (start1.x - start2.x) * (start2.z - end2.z) - (start1.z - start2.z) * (start2.x - end2.x);
+                    t = n / d;
+                    return (true, start1 + (end1 - start1) * t);
+                default:
+                    var res = MathUtility.LinesIntersection3D(start1, end1, start2, end2);
+                    return (res.Item1, (res.Item2 + res.Item3) / 2);
+            }
+        }
+
+        public static (bool, Vector3) LineSegmentsIntersectionPoint(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, SplineSpace dimension)
+            => LineSegmentsIntersectionPoint(start1, end1, start2, end2, dimension, MathUtility.defaultIntersectionEpsilon);
+        public static (bool, Vector3) LineSegmentsIntersectionPoint(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, float epsilon)
+            => LineSegmentsIntersectionPoint(start1, end1, start2, end2, null, epsilon);
+
+        public static (bool, Vector3) LineSegmentsIntersectionPoint(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            if (dimension == null) dimension = GetSpaceOf(start1, end1, start2, end2);
+            if (LineSegmentsIntersect(start1, end1, start2, end2, dimension, epsilon))
+            {
+                return LinesIntersectionPoint(start1, end1, start2, end2, dimension, epsilon);
+            }
+
+            return (false, Vector3.zero);
+        }
+
+        public static bool SplineLineIntersect(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
+            => SplineLineIntersect(spline, start, end, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
+        public static bool SplineLineIntersect(SplineBase spline, Vector3 start, Vector3 end, int accuracy, float epsilon)
+            => SplineLineIntersect(spline, start, end, accuracy, null, epsilon);
+
+        public static bool SplineLineIntersect(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            IReadOnlyList<Vector3> segments = spline.GetFlattened(accuracy);
+            for (int i = 0; i < segments.Count - 1; i++)
+            {
+                if (LineSegmentsIntersect(segments[i], segments[i + 1], start, end, dimension, epsilon))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool CurveLineIntersect(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace space)
+            => CurveLineIntersect(generator, points, start, end, accuracy, space, MathUtility.defaultIntersectionEpsilon);
+        public static bool CurveLineIntersect(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, float epsilon)
+            => CurveLineIntersect(generator, points, start, end, accuracy, null, epsilon);
+
+        public static bool CurveLineIntersect(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            Vector3 newPrev;
+            Vector3 previous = points[0];
+            for (int i = 1; i <= accuracy; i++)
+            {
+                newPrev = generator.Evaluate((float)i / accuracy, points);
+                if (LineSegmentsIntersect(previous, newPrev, start, end, space, epsilon)) return true;
+                previous = newPrev;
+            }
+            return false;
+        }
+
+        public static List<Vector3> SplineLineIntersectionPoints(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
+            => SplineLineIntersectionPoints(spline, start, end, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
+        public static List<Vector3> SplineLineIntersectionPoints(SplineBase spline, Vector3 start, Vector3 end, int accuracy, float epsilon)
+            => SplineLineIntersectionPoints(spline, start, end, accuracy, null, epsilon);
+
+        public static List<Vector3> SplineLineIntersectionPoints(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            List<Vector3> list = new List<Vector3>();
+            IReadOnlyList<Vector3> segments = spline.GetFlattened(accuracy);
+            Vector3 segStart, segEnd;
+            for (int i = 0; i < segments.Count - 1; i++)
+            {
+                segStart = segments[i];
+                segEnd = segments[i + 1];
+                if (LineSegmentsIntersect(segStart, segEnd, start, end, dimension, epsilon))
+                    list.Add(LinesIntersectionPoint(segStart, segEnd, start, end, dimension, epsilon).Item2);
+            }
+
+            return list;
+        }
+
+        public static List<Vector3> CurveLineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
+            => CurveLineIntersectionPoints(generator, points, start, end, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
+        public static List<Vector3> CurveLineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, float epsilon)
+            => CurveLineIntersectionPoints(generator, points, start, end, accuracy, null, epsilon);
+
+        public static List<Vector3> CurveLineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            List<Vector3> list = new List<Vector3>();
+            Vector3 newPrev;
+            Vector3 previous = points[0];
+            for (int i = 1; i <= accuracy; i++)
+            {
+                newPrev = generator.Evaluate((float)i / accuracy, points);
+                if (LineSegmentsIntersect(previous, newPrev, start, end, space, epsilon))
+                    list.Add(LinesIntersectionPoint(previous, newPrev, start, end, space, epsilon).Item2);
+                previous = newPrev;
+            }
+            return list;
+        }
+
+        public static List<float> SplineLineIntersectionTs(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
+            => SplineLineIntersectionTs(spline, start, end, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
+        public static List<float> SplineLineIntersectionTs(SplineBase spline, Vector3 start, Vector3 end, int accuracy, float epsilon)
+            => SplineLineIntersectionTs(spline, start, end, accuracy, null, epsilon);
+
+        public static List<float> SplineLineIntersectionTs(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            List<float> list = new List<float>();
+
+            Vector3 segStart, segEnd;
+            float step = 1f / accuracy;
+
+            for (float i = 0; i < 1f; i += step)
+            {
+                segStart = spline.ValueAt(i);
+                segEnd = spline.ValueAt(i + step);
+                if (LineSegmentsIntersect(segStart, segEnd, start, end, dimension, epsilon))
+                    list.Add(i + (step / 2f));
+            }
+
+            return list;
+        }
+
+        public static List<float> CurveLineIntersectionTs(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
+            => CurveLineIntersectionTs(generator, points, start, end, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
+        public static List<float> CurveLineIntersectionTs(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, float epsilon)
+            => CurveLineIntersectionTs(generator, points, start, end, accuracy, null, epsilon);
+
+        public static List<float> CurveLineIntersectionTs(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            List<float> list = new List<float>();
+
+            Vector3 newPrev;
+            Vector3 previous = points[0];
+            for (int i = 1; i <= accuracy; i++)
+            {
+                newPrev = generator.Evaluate((float)i / accuracy, points);
+                if (LineSegmentsIntersect(previous, newPrev, start, end, space, epsilon))
+                    list.Add((float)i / accuracy);
+                previous = newPrev;
+            }
+            return list;
+        }
+
+        public static List<Vector3> SplineSplineIntersectionPoints(SplineBase spline1, SplineBase spline2, int accuracy, SplineSpace dimension)
+            => SplineSplineIntersectionPoints(spline1, spline1, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
+        public static List<Vector3> SplineSplineIntersectionPoints(SplineBase spline1, SplineBase spline2, int accuracy, float epsilon)
+            => SplineSplineIntersectionPoints(spline1, spline2, accuracy, null, epsilon);
+
+        public static List<Vector3> SplineSplineIntersectionPoints(SplineBase spline1, SplineBase spline2, int accuracy, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            List<Vector3> list = new List<Vector3>();
+
+            if (!spline1.GetBounds().Intersects(spline2.GetBounds())) return list;
+
+            SplineSplineIntersections_Iterative(spline1, spline2, accuracy, list, dimension, epsilon);
+            return list;
+        }
+
+        public static List<Vector3> CurveSplineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, SplineSpace dimension)
+            => CurveSplineIntersectionPoints(generator, points, spline, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
+        public static List<Vector3> CurveSplineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, float epsilon)
+            => CurveSplineIntersectionPoints(generator, points, spline, accuracy, null, epsilon);
+
+        public static List<Vector3> CurveSplineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            List<Vector3> list = new List<Vector3>();
+
+            var ts = generator.GetExtremaTs(points);
+            SplineExtrema extrema = new SplineExtrema();
+            foreach (float t in ts) extrema.InsertValueT(t, generator, points);
+            Bounds b = new Bounds((extrema.Maxima + extrema.Minima) / 2, extrema.Maxima - extrema.Minima);
+
+            if (!b.Intersects(spline.GetBounds())) return list;
+
+            CurveSplineIntersections_Iterative(generator, points, spline, accuracy, list, space, epsilon);
+
+            return list;
+        }
+
+        public static bool SplineSplineIntersect(SplineBase spline1, SplineBase spline2, int accuracy, SplineSpace space)
+            => SplineSplineIntersect(spline1, spline2, accuracy, space, MathUtility.defaultIntersectionEpsilon);
+        public static bool SplineSplineIntersect(SplineBase spline1, SplineBase spline2, int accuracy, float epsilon)
+            => SplineSplineIntersect(spline1, spline2, accuracy, null, epsilon);
+
+        public static bool SplineSplineIntersect(SplineBase spline1, SplineBase spline2, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            if (!spline1.GetBounds().Intersects(spline2.GetBounds())) return false;
+            return SplineSplineIntersect_Iterative(spline1, spline2, accuracy, space, epsilon);
+        }
+
+        public static bool CurveSplineIntersect(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, SplineSpace space)
+            => CurveSplineIntersect(generator, points, spline, accuracy, space, MathUtility.defaultIntersectionEpsilon);
+        public static bool CurveSplineIntersect(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, float epsilon)
+            => CurveSplineIntersect(generator, points, spline, accuracy, null, epsilon);
+
+        public static bool CurveSplineIntersect(ISplineGenerator generator, IList<Vector3> points, SplineBase spline2, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        {
+            var ts = generator.GetExtremaTs(points);
+            SplineExtrema extrema = new SplineExtrema();
+            foreach (float t in ts) extrema.InsertValueT(t, generator, points);
+            Bounds b = new Bounds((extrema.Maxima + extrema.Minima) / 2, extrema.Maxima - extrema.Minima);
+            if (!b.Intersects(spline2.GetBounds())) return false;
+            return CurveSplineIntersect_Iterative(generator, points, spline2, accuracy, space, epsilon);
+        }
+
+        private static bool SplineSplineIntersect_Iterative(SplineBase spline1, SplineBase spline2, int accuracy, SplineSpace? dimension, float epsilon)
+        {
+            IReadOnlyList<Vector3> segments1 = spline1.GetFlattened(accuracy);
+            IReadOnlyList<Vector3> segments2 = spline2.GetFlattened(accuracy);
+
+            Vector3 start1, end1, start2, end2;
+            for (int i = 0; i < segments1.Count - 1; i++)
+            {
+                start1 = segments1[i];
+                end1 = segments1[i + 1];
+                for (int j = 0; j < segments2.Count - 1; j++)
+                {
+                    start2 = segments2[j];
+                    end2 = segments2[j + 1];
+
+                    if (LineSegmentsIntersect(start1, end1, start2, end2, dimension, epsilon))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static bool CurveSplineIntersect_Iterative(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, SplineSpace? space, float epsilon)
+        {
+            IReadOnlyList<Vector3> segments = spline.GetFlattened(accuracy);
+
+            Vector3 start1, end1, start2, end2;
+
+            start1 = points[0];
+            for (int i = 1; i <= accuracy; i++)
+            {
+                end1 = generator.Evaluate((float)i / accuracy, points);
+                for (int j = 0; j < segments.Count - 1; j++)
+                {
+                    start2 = segments[j];
+                    end2 = segments[j + 1];
+
+                    if (LineSegmentsIntersect(start1, end1, start2, end2, space, epsilon))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static void SplineSplineIntersections_Iterative(SplineBase spline1, SplineBase spline2, int accuracy, List<Vector3> list, SplineSpace? dimension, float epsilon)
+        {
+            IReadOnlyList<Vector3> segments1 = spline1.GetFlattened(accuracy);
+            IReadOnlyList<Vector3> segments2 = spline2.GetFlattened(accuracy);
+
+            Vector3 start1, end1, start2, end2;
+            for (int i = 0; i < segments1.Count - 1; i++)
+            {
+                start1 = segments1[i];
+                end1 = segments1[i + 1];
+                for (int j = 0; j < segments2.Count - 1; j++)
+                {
+                    start2 = segments2[j];
+                    end2 = segments2[j + 1];
+
+                    if (LineSegmentsIntersect(start1, end1, start2, end2, dimension, epsilon))
+                    {
+                        var res = LinesIntersectionPoint(start1, end1, start2, end2, dimension, epsilon);
+                        if (res.Item1 && !list.Contains(res.Item2)) list.Add(res.Item2);
+                    }
+                }
+            }
+        }
+
+        private static void CurveSplineIntersections_Iterative(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, List<Vector3> list, SplineSpace? space, float epsilon)
+        {
+            IReadOnlyList<Vector3> segments = spline.GetFlattened(accuracy);
+
+            Vector3 start1, end1, start2, end2;
+
+            start1 = points[0];
+            for (int i = 1; i <= accuracy; i++)
+            {
+                end1 = generator.Evaluate((float)i / accuracy, points);
+                for (int j = 0; j < segments.Count - 1; j++)
+                {
+                    start2 = segments[j];
+                    end2 = segments[j + 1];
+
+                    if (LineSegmentsIntersect(start1, end1, start2, end2, space, epsilon))
+                    {
+                        var res = LinesIntersectionPoint(start1, end1, start2, end2, space, epsilon);
+                        if (res.Item1 && !list.Contains(res.Item2)) list.Add(res.Item2);
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }
