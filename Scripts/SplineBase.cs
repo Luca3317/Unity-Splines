@@ -284,6 +284,17 @@ namespace UnitySplines
             return num / dnm;
         }
 
+        public void SplitAt(float t)
+        {
+            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
+
+            IList<Vector3> newSegments = _generator.SplitSegment(segmentT, _pointPositions.Segment(segmentIndex));
+            newSegments.RemoveAt(newSegments.Count - 1);
+
+            InsertRange(segmentIndex, newSegments);
+            Remove(segmentIndex + 2);
+        }
+
         public void SetCache(bool cache)
         {
             if (cache && _cacher == null)

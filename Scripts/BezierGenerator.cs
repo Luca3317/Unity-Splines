@@ -63,6 +63,31 @@ namespace UnitySplines.Bezier
             return SplineHelper.GetNormalsModifier(t, _characteristicMatrix, normalAngleOffsets);
         }
 
+        public IList<Vector3> SplitSegment(float t, IList<Vector3> points)
+        {
+            if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
+
+            Vector3 point0 = points[0];
+            Vector3 point1 = points[1];
+            Vector3 point2 = points[2];
+            Vector3 point3 = points[3];
+
+            Vector3 splitPoint = Evaluate(t, points);
+
+            float t2 = t * t;
+            float mt2 = (t - 1) * (t - 1);
+            List<Vector3> newPoints = new List<Vector3>();
+            newPoints.Add(point0);
+            newPoints.Add(t * point1 - (t - 1) * point0);
+            newPoints.Add(t2 * point2 - 2 * (t2 - t) * point1 + mt2 * point0);
+            newPoints.Add(splitPoint);
+            newPoints.Add(t2 * point3 - 2 * (t2 - t) * point2 + mt2 * point1);
+            newPoints.Add(t * point3 - (t - 1) * point2);
+            newPoints.Add(point3);
+
+            return newPoints;
+        }
+
         private const int _segmentSize = 4;
         private const int _slideSize = 3;
         private const string _generatorType = "Bezier";

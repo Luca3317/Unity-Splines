@@ -24,6 +24,9 @@ namespace UnitySplines
 
         public float GetNormalsModifier(Vector3 normal, float t, IList<float> normalAngleOffsets) => 0f;
 
+        public IList<Vector3> SplitSegment(float t, params Vector3[] points) => SplitSegment(t, (IList<Vector3>)points);
+        public IList<Vector3> SplitSegment(float t, IList<Vector3> points);
+
         protected const string _pointAmountErrorMessage = "The passed in amount of points ({0}) does not constitute exactly one {1} segment (required amount: {2})";
     }
 }
