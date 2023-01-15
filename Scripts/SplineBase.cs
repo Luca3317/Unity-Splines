@@ -435,9 +435,9 @@ namespace UnitySplines
         // TODO:
         // Maybe move distances from curvecacher to splinecacher
         // If not; implement this one like the other cachable methods, ie getflattened
-        private IReadOnlyList<float> GenerateDistanceLUT(int accuracy = -1)
+        private List<float> GenerateDistanceLUT(int accuracy = -1)
         {
-            if (_cacher != null && _cacher.Distances.Count >= accuracy) return _cacher.Distances;
+            if (_cacher != null && _cacher.Distances.Count == NeededAccuracy(accuracy)) return _cacher.Distances;
 
             IReadOnlyList<Vector3> flattened = GetFlattened(accuracy);
             List<float> distances = new List<float>();
@@ -451,13 +451,12 @@ namespace UnitySplines
                 distances.Add(cumulativeDistance);
             }
 
-            ReadOnlyCollection<float> roDistances = distances.AsReadOnly();
-            if (_cacher != null) _cacher.Distances = roDistances;
-            return roDistances;
+            if (_cacher != null) _cacher.Distances = distances;
+            return distances;
         }
 
-        private IReadOnlyList<FrenetFrame> GenerateFrenetFrames() => GenerateFrenetFrames(_accuracy);
-        private IReadOnlyList<FrenetFrame> GenerateFrenetFrames(int accuracy)
+        private List<FrenetFrame> GenerateFrenetFrames() => GenerateFrenetFrames(_accuracy);
+        private List<FrenetFrame> GenerateFrenetFrames(int accuracy, FrenetFrame? initialOrientation = null)
         {
             if (_cacher != null && _cacher.Frames.Count == NeededAccuracy(accuracy)) return _cacher.Frames;
 
@@ -469,20 +468,19 @@ namespace UnitySplines
             }
             frames.AddRange(GenerateSegmentFrenetFrames(SegmentCount - 1, accuracy));
 
-            IReadOnlyList<FrenetFrame> roFrames = frames.AsReadOnly();
-            if (_cacher != null && accuracy == _accuracy) _cacher.Frames = roFrames;
-            return roFrames;
+            if (_cacher != null && accuracy == _accuracy) _cacher.Frames = frames;
+            return frames;
         }
 
-        private IReadOnlyList<FrenetFrame> GenerateSegmentFrenetFrames(int segmentIndex) => GenerateSegmentFrenetFrames(segmentIndex, _accuracy);
-        private IReadOnlyList<FrenetFrame> GenerateSegmentFrenetFrames(int segmentIndex, int accuracy)
+        private List<FrenetFrame> GenerateSegmentFrenetFrames(int segmentIndex) => GenerateSegmentFrenetFrames(segmentIndex, _accuracy);
+        private List<FrenetFrame> GenerateSegmentFrenetFrames(int segmentIndex, int accuracy, FrenetFrame? initialOrientation = null)
         {
             if (_cacher != null && _cacher[segmentIndex].Frames.Count == accuracy) return _cacher[segmentIndex].Frames;
 
             ListSegment<Vector3> segment = _pointPositions[segmentIndex];
-            IReadOnlyList<FrenetFrame> roFrames = SplineHelper.GenerateFrenetFrames(accuracy, _generator, segment);
-            if (_cacher != null && accuracy == _accuracy) _cacher[segmentIndex].Frames = roFrames;
-            return roFrames;
+            List<FrenetFrame> frames = SplineHelper.GenerateFrenetFrames(accuracy, _generator, segment);
+            if (_cacher != null && accuracy == _accuracy) _cacher[segmentIndex].Frames = frames;
+            return frames;
         }
 
         // testing

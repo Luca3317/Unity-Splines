@@ -225,7 +225,7 @@ namespace UnitySplines
             return distances.AsReadOnly();
         }
 
-        public static IReadOnlyList<FrenetFrame> GenerateFrenetFrames(int accuracy, ISplineGenerator generator, IList<Vector3> points, FrenetFrame? initialOrientation = null)
+        public static List<FrenetFrame> GenerateFrenetFrames(int accuracy, ISplineGenerator generator, IList<Vector3> points, FrenetFrame? initialOrientation = null)
         {
             float step = 1f / accuracy;
             List<FrenetFrame> frames = new List<FrenetFrame>();
@@ -256,7 +256,7 @@ namespace UnitySplines
                 frames.Add(x1);
             }
 
-            return frames.AsReadOnly();
+            return frames;
         }
 
         static FrenetFrame GenerateFrenetFrameAt(float t, ISplineGenerator generator, IList<Vector3> points)

@@ -27,12 +27,12 @@ namespace UnitySplines
             get => _lengthAccuracy;
             set => _lengthAccuracy = value;
         }
-        public IReadOnlyList<float> Distances
+        public List<float> Distances
         {
             get => _distances;
             set => _distances = value;
         }
-        public IReadOnlyList<FrenetFrame> Frames
+        public List<FrenetFrame> Frames
         {
             get => _frames;
             set => _frames = value;
@@ -57,7 +57,7 @@ namespace UnitySplines
         private IReadOnlyList<Vector3> _flattened;
         private float _length;
         private int _lengthAccuracy;
-        private IReadOnlyList<float> _distances;
-        private IReadOnlyList<FrenetFrame> _frames;
+        private List<float> _distances;
+        private List<FrenetFrame> _frames;
     }
 }
