@@ -245,31 +245,30 @@ namespace UnitySplines
         public float DistanceToT(float distance) => DistanceToT(distance, _accuracy);
         public float DistanceToT(float distance, int accuracy)
         {
-            if (distance == 0) return 0;
-
-            IReadOnlyList<Vector3> flattened = GetFlattened(accuracy);
-            IReadOnlyList<float> distances = GenerateDistanceLUT(flattened.Count);
+            if (distance <= 0) return 0; // TODO probably throw error instead
             float length = GetLength(accuracy);
+            if (distance >= length) return SegmentCount; // TODO probably throw error instead
 
-            if (distance > 0 && distance < length)
+            List<float> distances = GenerateDistanceLUT(accuracy);
+            int index = distances.BinarySearch(distance);
+            // If no exact match is found (the expected case)
+            if (index < 0)
             {
-                for (int i = 0; i < distances.Count - 1; i++)
-                {
-                    if (distances[i] <= distance && distance <= distances[i + 1])
-                    {
-                        // TODO: Simply multiplying here with segmentcount *might* be sloppy
-                        float t0 = (float)i / (distances.Count - 1) * SegmentCount;
-                        float t1 = (float)(i + 1) / (distances.Count - 1) * SegmentCount;
-                        // Linearly interpolate between the two distances
-                        return t0 + (distance - distances[i]) * ((t1 - t0) / (distances[i + 1] - distances[i]));
-                    }
-                }
+                // Invert bits of index
+                // See return value of binary search https://learn.microsoft.com/de-de/dotnet/api/system.collections.generic.list-1.binarysearch?view=net-7.0
+                index = ~index;
+            }
+            // If exact match is found
+            else
+            { 
+                return (float)(index) / (distances.Count - 1) * SegmentCount;
             }
 
-            if (distance <= 0)
-                return 0;
-            else
-                return SegmentCount;
+            // TODO: Simply multiplying here with segmentcount* might*be sloppy
+            float t0 = (float)(index - 1) / (distances.Count - 1) * SegmentCount;
+            float t1 = (float)(index) / (distances.Count - 1) * SegmentCount;
+            // Linearly interpolate between the two distances
+            return t0 + (distance - distances[index - 1]) * ((t1 - t0) / (distances[index] - distances[index - 1]));
         }
 
         public float GetCurvatureAt(float t)
