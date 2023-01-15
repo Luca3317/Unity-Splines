@@ -316,22 +316,21 @@ namespace UnitySplines
         public bool SegmentIntersects(int segmentIndex, Vector3 start, Vector3 end, int accuracy, float epsilon)
             => SplineUtility.CurveLineIntersect(_generator, SegmentPositions(segmentIndex), start, end, accuracy, _space, epsilon);
 
-        public List<Vector3> IntersectionPoints(SplineBase spline, int accuracy)
+        public IList<Vector3> IntersectionPoints(SplineBase spline, int accuracy)
             => SplineUtility.SplineSplineIntersectionPoints(this, spline, accuracy);
-        public List<Vector3> SegmentIntersectionPoints(int segmentIndex, SplineBase spline, int accuracy)
+        public IList<Vector3> SegmentIntersectionPoints(int segmentIndex, SplineBase spline, int accuracy)
             => SplineUtility.CurveSplineIntersectionPoints(_generator, SegmentPositions(segmentIndex), spline, accuracy);
 
-        public List<Vector3> IntersectionPoints(ISplineGenerator generator, IList<Vector3> points, int accuracy)
+        public IList<Vector3> IntersectionPoints(ISplineGenerator generator, IList<Vector3> points, int accuracy)
             => SplineUtility.CurveSplineIntersectionPoints(generator, points, this, accuracy);
-        public List<Vector3> SegmentIntersectionPoints(int segmentIndex, ISplineGenerator generator, IList<Vector3> points, int accuracy)
+        public IList<Vector3> SegmentIntersectionPoints(int segmentIndex, ISplineGenerator generator, IList<Vector3> points, int accuracy)
             => SplineUtility.CurveSplineIntersectionPoints(_generator, SegmentPositions(segmentIndex), new Spline(generator, false, points), accuracy);
 
-        public List<Vector3> IntersectionPoints(Vector3 start, Vector3 end, int accuracy)
+        public IList<Vector3> IntersectionPoints(Vector3 start, Vector3 end, int accuracy)
             => SplineUtility.SplineLineIntersectionPoints(this, start, end, accuracy);
-        public List<Vector3> SegmentIntersectionPoints(int segmentIndex, Vector3 start, Vector3 end, int accuracy)
+        public IList<Vector3> SegmentIntersectionPoints(int segmentIndex, Vector3 start, Vector3 end, int accuracy)
             => SplineUtility.CurveLineIntersectionPoints(_generator, SegmentPositions(segmentIndex), start, end, accuracy);
         #endregion
-
 
         public void SetCache(bool cache)
         {

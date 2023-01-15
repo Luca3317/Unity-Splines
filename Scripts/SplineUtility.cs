@@ -235,7 +235,7 @@ namespace UnitySplines
             return distances.AsReadOnly();
         }
 
-        public static List<FrenetFrame> GenerateFrenetFrames(int accuracy, ISplineGenerator generator, IList<Vector3> points, FrenetFrame? initialOrientation = null)
+        public static IList<FrenetFrame> GenerateFrenetFrames(int accuracy, ISplineGenerator generator, IList<Vector3> points, FrenetFrame? initialOrientation = null)
         {
             float step = 1f / accuracy;
             List<FrenetFrame> frames = new List<FrenetFrame>();
@@ -418,12 +418,12 @@ namespace UnitySplines
             return false;
         }
 
-        public static List<Vector3> SplineLineIntersectionPoints(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
+        public static IList<Vector3> SplineLineIntersectionPoints(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
             => SplineLineIntersectionPoints(spline, start, end, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
-        public static List<Vector3> SplineLineIntersectionPoints(SplineBase spline, Vector3 start, Vector3 end, int accuracy, float epsilon)
+        public static IList<Vector3> SplineLineIntersectionPoints(SplineBase spline, Vector3 start, Vector3 end, int accuracy, float epsilon)
             => SplineLineIntersectionPoints(spline, start, end, accuracy, null, epsilon);
 
-        public static List<Vector3> SplineLineIntersectionPoints(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        public static IList<Vector3> SplineLineIntersectionPoints(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
         {
             List<Vector3> list = new List<Vector3>();
             IReadOnlyList<Vector3> segments = spline.GetFlattened(accuracy);
@@ -439,12 +439,12 @@ namespace UnitySplines
             return list;
         }
 
-        public static List<Vector3> CurveLineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
+        public static IList<Vector3> CurveLineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
             => CurveLineIntersectionPoints(generator, points, start, end, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
-        public static List<Vector3> CurveLineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, float epsilon)
+        public static IList<Vector3> CurveLineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, float epsilon)
             => CurveLineIntersectionPoints(generator, points, start, end, accuracy, null, epsilon);
 
-        public static List<Vector3> CurveLineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        public static IList<Vector3> CurveLineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
         {
             List<Vector3> list = new List<Vector3>();
             Vector3 newPrev;
@@ -459,12 +459,12 @@ namespace UnitySplines
             return list;
         }
 
-        public static List<float> SplineLineIntersectionTs(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
+        public static IList<float> SplineLineIntersectionTs(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
             => SplineLineIntersectionTs(spline, start, end, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
-        public static List<float> SplineLineIntersectionTs(SplineBase spline, Vector3 start, Vector3 end, int accuracy, float epsilon)
+        public static IList<float> SplineLineIntersectionTs(SplineBase spline, Vector3 start, Vector3 end, int accuracy, float epsilon)
             => SplineLineIntersectionTs(spline, start, end, accuracy, null, epsilon);
 
-        public static List<float> SplineLineIntersectionTs(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        public static IList<float> SplineLineIntersectionTs(SplineBase spline, Vector3 start, Vector3 end, int accuracy, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
         {
             List<float> list = new List<float>();
 
@@ -482,12 +482,12 @@ namespace UnitySplines
             return list;
         }
 
-        public static List<float> CurveLineIntersectionTs(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
+        public static IList<float> CurveLineIntersectionTs(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace dimension)
             => CurveLineIntersectionTs(generator, points, start, end, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
-        public static List<float> CurveLineIntersectionTs(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, float epsilon)
+        public static IList<float> CurveLineIntersectionTs(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, float epsilon)
             => CurveLineIntersectionTs(generator, points, start, end, accuracy, null, epsilon);
 
-        public static List<float> CurveLineIntersectionTs(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        public static IList<float> CurveLineIntersectionTs(ISplineGenerator generator, IList<Vector3> points, Vector3 start, Vector3 end, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
         {
             List<float> list = new List<float>();
 
@@ -503,12 +503,12 @@ namespace UnitySplines
             return list;
         }
 
-        public static List<Vector3> SplineSplineIntersectionPoints(SplineBase spline1, SplineBase spline2, int accuracy, SplineSpace dimension)
+        public static IList<Vector3> SplineSplineIntersectionPoints(SplineBase spline1, SplineBase spline2, int accuracy, SplineSpace dimension)
             => SplineSplineIntersectionPoints(spline1, spline1, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
-        public static List<Vector3> SplineSplineIntersectionPoints(SplineBase spline1, SplineBase spline2, int accuracy, float epsilon)
+        public static IList<Vector3> SplineSplineIntersectionPoints(SplineBase spline1, SplineBase spline2, int accuracy, float epsilon)
             => SplineSplineIntersectionPoints(spline1, spline2, accuracy, null, epsilon);
 
-        public static List<Vector3> SplineSplineIntersectionPoints(SplineBase spline1, SplineBase spline2, int accuracy, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        public static IList<Vector3> SplineSplineIntersectionPoints(SplineBase spline1, SplineBase spline2, int accuracy, SplineSpace? dimension = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
         {
             List<Vector3> list = new List<Vector3>();
 
@@ -518,12 +518,12 @@ namespace UnitySplines
             return list;
         }
 
-        public static List<Vector3> CurveSplineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, SplineSpace dimension)
+        public static IList<Vector3> CurveSplineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, SplineSpace dimension)
             => CurveSplineIntersectionPoints(generator, points, spline, accuracy, dimension, MathUtility.defaultIntersectionEpsilon);
-        public static List<Vector3> CurveSplineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, float epsilon)
+        public static IList<Vector3> CurveSplineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, float epsilon)
             => CurveSplineIntersectionPoints(generator, points, spline, accuracy, null, epsilon);
 
-        public static List<Vector3> CurveSplineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
+        public static IList<Vector3> CurveSplineIntersectionPoints(ISplineGenerator generator, IList<Vector3> points, SplineBase spline, int accuracy, SplineSpace? space = null, float epsilon = MathUtility.defaultIntersectionEpsilon)
         {
             List<Vector3> list = new List<Vector3>();
 
