@@ -7,6 +7,12 @@ namespace UnitySplines
     [System.Serializable]
     public class Spline : SplineBase
     {
+        public Spline(ISplineGenerator generator, bool cache, params Vector3[] points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
+        { }
+        public Spline(ISplineGenerator generator, bool cache, IEnumerable<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
+        { }
+        public Spline(ISplineGenerator generator, bool cache, SegmentedCollection<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points.Items))
+        { }
         public Spline(ISplineGenerator generator, bool cache, params SplinePoint[] points) : base(generator, cache, points)
         { }
         public Spline(ISplineGenerator generator, bool cache, IEnumerable<SplinePoint> points) : base(generator, cache, points)
@@ -141,7 +147,13 @@ namespace UnitySplines
     {
         public T PointData(int pointIndex) => _pointData.Item(pointIndex);
         public ListSegment<T> SegmentData(int segmentIndex) => _pointData.Segment(segmentIndex);
-
+        
+        public Spline(ISplineGenerator generator, bool cache, params Vector3[] points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
+        { }
+        public Spline(ISplineGenerator generator, bool cache, IEnumerable<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
+        { }
+        public Spline(ISplineGenerator generator, bool cache, SegmentedCollection<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points.Items))
+        { }
         public Spline(ISplineGenerator generator, bool cache, params SplinePoint[] points) : base(generator, cache, points)
         { }
         public Spline(ISplineGenerator generator, bool cache, IEnumerable<SplinePoint> points) : base(generator, cache, points)

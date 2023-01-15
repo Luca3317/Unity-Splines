@@ -32,6 +32,9 @@ namespace UnitySplines
         public ListSegment<float> SegmentNormals(int segmentIndex) => _pointNormals.Segment(segmentIndex);
         #endregion
 
+        public SplineBase(ISplineGenerator generator, bool cache, params Vector3[] points) => InitSpline(generator, cache, SplineUtility.VectorsToSplinePoints(points));
+        public SplineBase(ISplineGenerator generator, bool cache, IEnumerable<Vector3> points) => InitSpline(generator, cache, SplineUtility.VectorsToSplinePoints(points));
+        public SplineBase(ISplineGenerator generator, bool cache, SegmentedCollection<Vector3> points) => InitSpline(generator, cache, SplineUtility.VectorsToSplinePoints(points.Items));
         public SplineBase(ISplineGenerator generator, bool cache, params SplinePoint[] points) => InitSpline(generator, cache, points);
         public SplineBase(ISplineGenerator generator, bool cache, IEnumerable<SplinePoint> points) => InitSpline(generator, cache, points);
         public SplineBase(ISplineGenerator generator, bool cache, SegmentedCollection<SplinePoint> points) => InitSpline(generator, cache, points.Items);
