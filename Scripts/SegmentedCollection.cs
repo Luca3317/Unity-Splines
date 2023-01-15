@@ -62,7 +62,7 @@ namespace UnitySplines
         /// <returns></returns>
         public ListSegment<T> Segment(int segmentIndex)
         {
-            return new ListSegment<T>(_items, SplineHelper.SegmentToPointIndex(segmentIndex, _segmentSize, _slideSize), _segmentSize);
+            return new ListSegment<T>(_items, MathUtility.SegmentToPointIndex(segmentIndex, _segmentSize, _slideSize), _segmentSize);
         }
         /// <summary>
         /// Returns all segments in the collection as an IEnumerable.
@@ -72,7 +72,7 @@ namespace UnitySplines
         [System.Runtime.CompilerServices.IndexerName("MyItem")]
         public ListSegment<T> this[int segmentIndex] => Segment(segmentIndex);
         [System.Runtime.CompilerServices.IndexerName("MyItem")]
-        public T this[int segmentIndex, int pointIndex] => _items[SplineHelper.SegmentToPointIndex(segmentIndex, _segmentSize, _slideSize) + pointIndex];
+        public T this[int segmentIndex, int pointIndex] => _items[MathUtility.SegmentToPointIndex(segmentIndex, _segmentSize, _slideSize) + pointIndex];
 
         public SegmentedCollection(int segmentSize, int slideSize, IEnumerable<T> items) => Init(segmentSize, slideSize, items);
         public SegmentedCollection(int segmentSize, int slideSize, params T[] items) => Init(segmentSize, slideSize, items);
@@ -136,7 +136,7 @@ namespace UnitySplines
 
         public void InsertRangeAtSegment(int segmentIndex, ICollection<T> items)
         {
-            if (items.Count != _slideSize) throw new System.ArgumentException(string.Format(_incompatibleAmountOfNewItemsErrorMsg, _slideSize));
+            if (items.Count % _slideSize != 0) throw new System.ArgumentException(string.Format(_incompatibleAmountOfNewItemsErrorMsg, _slideSize));
             _items.InsertRange(segmentIndex * _slideSize, items);
         }
 
@@ -150,8 +150,7 @@ namespace UnitySplines
         public IEnumerable<int> SegmentIndecesOf(int itemIndex) => SegmentIndecesOf(_items[itemIndex]);
         public IEnumerable<int> SegmentIndecesOf(T item)
         {
-            // TODO: Rename and move some functions from SplineHelper to more general helper class
-            IList<int> indeces = SplineHelper.PointToSegmentIndeces(_items.IndexOf(item), _segmentSize, _slideSize);
+            IList<int> indeces = MathUtility.PointToSegmentIndeces(_items.IndexOf(item), _segmentSize, _slideSize);
             indeces.Remove(SegmentCount);
             return indeces;
         }

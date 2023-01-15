@@ -6,36 +6,6 @@ namespace UnitySplines
 {
     public static class SplineHelper
     {
-        #region Converters
-        /// <summary>
-        /// Converts a point index to the corresponding segment indeces.
-        /// </summary>
-        /// <param name="pointIndex">The point index that will be converted.</param>
-        /// <returns>The indeces of all segments that contain the point at i.</returns>
-        public static IList<int> PointToSegmentIndeces(int pointIndex, int segmentSize, int slideSize)
-        {
-            List<int> indeces = new List<int>();
-
-            int firstIndex = pointIndex - pointIndex % slideSize;
-            int lastIndex = firstIndex + slideSize;
-
-            while (pointIndex <= lastIndex)
-            {
-                indeces.Add(PointToFirstSegmentIndex(pointIndex, segmentSize, slideSize));
-                pointIndex += slideSize;
-            }
-
-            return indeces;
-        }
-        public static int PointToFirstSegmentIndex(int pointIndex, int segmentSize, int slideSize)
-            => pointIndex < segmentSize ? 0 : (pointIndex - segmentSize) / slideSize + 1;
-        /// <summary>
-        /// Converts a segment index to the corresponding point index.
-        /// </summary>
-        /// <param name="segmentIndex">The segment index to convert.</param>
-        /// <returns>The index of the first point contained in this segment.</returns>
-        public static int SegmentToPointIndex(int segmentIndex, int segmentSize, int slideSize) => slideSize * segmentIndex;
-
         public static Vector3 ConvertToSpace(Vector3 vec, SplineSpace currentSpace, SplineSpace newSpace)
         {
             if (newSpace == currentSpace) return vec;
@@ -66,16 +36,57 @@ namespace UnitySplines
                 }
             }
 
-            Debug.Log("Setting " + vec + " to " + newPosition + " ( " + currentSpace + " to " + newSpace + " )");
-
-            return newPosition; 
+            return newPosition;
         }
 
-        public static IList<Vector3> SplinePointsToVector(IList<SplinePoint> points)
+        public static SplineSpace GetSpaceOf(params Vector3[] vectors)
+        {
+            byte space = 0b100;
+            for (int i = 0; i < vectors.Length; i++)
+            {
+                if (vectors[i].y != 0)
+                {
+                    space += 0b010;
+                    break;
+                }
+            }
+            for (int i = 0; i < vectors.Length; i++)
+            {
+                if (vectors[i].z != 0)
+                {
+                    space += 0b001;
+                    break;
+                }
+            }
+
+            return (SplineSpace)space;
+        }
+
+        public static IList<Vector3> SplinePointsToVector(IEnumerable<SplinePoint> points)
         {
             List<Vector3> vectors = new List<Vector3>();
             foreach (var item in points) vectors.Add(item.Position);
             return vectors;
+        }
+
+        public static IList<SplinePoint> VectorsToSplinePoints(IEnumerable<Vector3> vectors)
+        {
+            List<SplinePoint> points = new List<SplinePoint>();
+            foreach (var item in vectors) points.Add(new SplinePoint(item));
+            return points;
+        }
+
+        public static int ToSegmentPercentage(ref float t)
+        {
+            int segmentIndex = (int)t;
+            if (t % 1 == 0 && t > 0)
+            {
+                segmentIndex--;
+                t = 1f;
+            }
+            else t %= 1;
+
+            return segmentIndex;
         }
 
         public static (int, float) PercentageToSegmentPercentage(float t)
@@ -145,7 +156,7 @@ namespace UnitySplines
             return pMatrix;
         }
 
-        public static Matrix4x4 CreateNormalAngleOffsetMatrix(params float[] normalAngles) => CreateNormalAngleOffsetMatrix((IList<float>)normalAngles); 
+        public static Matrix4x4 CreateNormalAngleOffsetMatrix(params float[] normalAngles) => CreateNormalAngleOffsetMatrix((IList<float>)normalAngles);
         public static Matrix4x4 CreateNormalAngleOffsetMatrix(IList<float> normalAngles)
         {
             if (normalAngles.Count > 4) throw new System.ArgumentException();
@@ -161,9 +172,8 @@ namespace UnitySplines
         public static Vector3 Evaluate(float t, int order, Matrix4x4 characteristicMatrix, params Vector3[] points) => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
         public static Vector3 Evaluate(float t, int order, Matrix4x4 characteristicMatrix, IList<Vector3> points) => (CreateTMatrix(t, order) * characteristicMatrix * CreatePointMatrix(points)).GetRow(0);
 
-        public static float GetNormalsModifier(float t, Matrix4x4 characteristicMatrix, params float[] normalAngles) => (CreateTMatrix(t, 0) * characteristicMatrix * CreateNormalAngleOffsetMatrix(normalAngles))[0,0];
-        public static float GetNormalsModifier(float t, Matrix4x4 characteristicMatrix, IList<float> normalAngles) => (CreateTMatrix(t, 0) * characteristicMatrix * CreateNormalAngleOffsetMatrix(normalAngles))[0,0];
-        #endregion
+        public static float GetNormalsModifier(float t, Matrix4x4 characteristicMatrix, params float[] normalAngles) => (CreateTMatrix(t, 0) * characteristicMatrix * CreateNormalAngleOffsetMatrix(normalAngles))[0, 0];
+        public static float GetNormalsModifier(float t, Matrix4x4 characteristicMatrix, IList<float> normalAngles) => (CreateTMatrix(t, 0) * characteristicMatrix * CreateNormalAngleOffsetMatrix(normalAngles))[0, 0];
 
         public static Bounds GetBounds(ISplineGenerator generator, IList<Vector3> points)
         {
