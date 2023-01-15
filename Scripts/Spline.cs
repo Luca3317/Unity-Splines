@@ -34,7 +34,7 @@ namespace UnitySplines
             if (_space == newSpace) return;
 
             for (int i = 0; i < PointCount; i++)
-                _pointPositions.SetItem(i, SplineHelper.ConvertToSpace(_pointPositions.Item(i), _space, newSpace));
+                _pointPositions.SetItem(i, SplineUtility.ConvertToSpace(_pointPositions.Item(i), _space, newSpace));
 
             ClearCache();
             _space = newSpace;
@@ -53,7 +53,7 @@ namespace UnitySplines
 
         public void SetPointPosition(int pointIndex, Vector3 newPosition)
         {
-            _pointPositions.SetItem(pointIndex, SplineHelper.ConvertToSpace(newPosition, SplineSpace.XYZ, _space));
+            _pointPositions.SetItem(pointIndex, SplineUtility.ConvertToSpace(newPosition, SplineSpace.XYZ, _space));
 
             if (_cacher != null)
             {

@@ -38,7 +38,7 @@ namespace UnitySplines
 
         public Vector3 ValueAt(float t)
         {
-            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
+            (int segmentIndex, float segmentT) = SplineUtility.PercentageToSegmentPercentage(t);
 
             ListSegment<Vector3> segment = _pointPositions.Segment(segmentIndex);
             return _generator.Evaluate(segmentT, segment);
@@ -46,18 +46,18 @@ namespace UnitySplines
 
         public Vector3 TangentAt(float t)
         {
-            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
+            (int segmentIndex, float segmentT) = SplineUtility.PercentageToSegmentPercentage(t);
 
             ListSegment<Vector3> segment = _pointPositions.Segment(segmentIndex);
             return _generator.EvaluateDerivative(segmentT, 1, segment);
         }
 
         public Vector3 NormalAt(float t, bool alignNormalsToCurveOrientation = false, FrenetFrame? initialOrientation = null)
-            => NormalAt(t, _accuracy, alignNormalsToCurveOrientation, initialOrientation);
+                  => NormalAt(t, _accuracy, alignNormalsToCurveOrientation, initialOrientation);
         public Vector3 NormalAt(float t, int accuracy, bool alignNormalsToCurveOrientation = false, FrenetFrame? initialOrientation = null)
         {
             Vector3 tangent = TangentAt(t);
-            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
+            (int segmentIndex, float segmentT) = SplineUtility.PercentageToSegmentPercentage(t);
             float xt, zt, yt;
 
             Vector3 normal;
@@ -172,7 +172,7 @@ namespace UnitySplines
             if (_cacher != null && _cacher[segmentIndex].Flattened.Count == _accuracy) return _cacher[segmentIndex].Flattened;
 
             ListSegment<Vector3> segment = _pointPositions.Segment(segmentIndex);
-            IReadOnlyList<Vector3> roFlattened = SplineHelper.GetFlattened(accuracy, _generator, segment);
+            IReadOnlyList<Vector3> roFlattened = SplineUtility.GetFlattened(accuracy, _generator, segment);
             if (_cacher != null && accuracy == _accuracy) _cacher[segmentIndex].Flattened = roFlattened;
             return roFlattened;
         }
@@ -218,9 +218,11 @@ namespace UnitySplines
         }
 
         public FrenetFrame GetFrenetFrameAt(float t) => GetFrenetFrameAt(t, _accuracy);
-        public FrenetFrame GetFrenetFrameAt(float t, int accuracy)
+        public FrenetFrame GetFrenetFrameAt(float t, int accuracy, FrenetFrame? initialOrientation = null)
         {
-            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
+            GenerateFrenetFrames(accuracy, initialOrientation);
+
+            (int segmentIndex, float segmentT) = SplineUtility.PercentageToSegmentPercentage(t);
             IReadOnlyList<FrenetFrame> roFrames = GenerateSegmentFrenetFrames(segmentIndex, accuracy);
             t = segmentT;
 
@@ -273,7 +275,7 @@ namespace UnitySplines
 
         public float GetCurvatureAt(float t)
         {
-            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
+            (int segmentIndex, float segmentT) = SplineUtility.PercentageToSegmentPercentage(t);
             Vector3 derivative = _generator.EvaluateDerivative(segmentT, 1, _pointPositions.Segment(segmentIndex));
             Vector3 secondDerivative = _generator.EvaluateDerivative(segmentT, 2, _pointPositions.Segment(segmentIndex));
             float num = derivative.x * secondDerivative.y - derivative.y * secondDerivative.x;
@@ -286,7 +288,7 @@ namespace UnitySplines
 
         public void SplitAt(float t)
         {
-            (int segmentIndex, float segmentT) = SplineHelper.PercentageToSegmentPercentage(t);
+            (int segmentIndex, float segmentT) = SplineUtility.PercentageToSegmentPercentage(t);
 
             IList<Vector3> newSegments = _generator.SplitSegment(segmentT, _pointPositions.Segment(segmentIndex));
             newSegments.RemoveAt(newSegments.Count - 1);
@@ -297,34 +299,34 @@ namespace UnitySplines
 
         #region Intersection
         public bool Intersects(SplineBase spline, int accuracy)
-            => SplineHelper.SplineSplineIntersect(this, spline, accuracy);
+            => SplineUtility.SplineSplineIntersect(this, spline, accuracy);
         public bool SegmentIntersects(int segmentIndex, SplineBase spline, int accuracy)
-            => SplineHelper.CurveSplineIntersect(_generator, SegmentPositions(segmentIndex), spline, accuracy);
+            => SplineUtility.CurveSplineIntersect(_generator, SegmentPositions(segmentIndex), spline, accuracy);
 
         public bool Intersects(ISplineGenerator generator, IList<Vector3> points, int accuracy)
-            => SplineHelper.CurveSplineIntersect(generator, points, this, accuracy);
+            => SplineUtility.CurveSplineIntersect(generator, points, this, accuracy);
         public bool SegmentIntersects(int segmentIndex, ISplineGenerator generator, IList<Vector3> points, int accuracy)
-            => SplineHelper.CurveSplineIntersect(_generator, SegmentPositions(segmentIndex), new Spline(generator, false, points), accuracy);
+            => SplineUtility.CurveSplineIntersect(_generator, SegmentPositions(segmentIndex), new Spline(generator, false, points), accuracy);
 
         public bool Intersects(Vector3 start, Vector3 end, int accuracy)
-            => SplineHelper.SplineLineIntersect(this, start, end, accuracy);
+            => SplineUtility.SplineLineIntersect(this, start, end, accuracy);
         public bool SegmentIntersects(int segmentIndex, Vector3 start, Vector3 end, int accuracy, float epsilon)
-            => SplineHelper.CurveLineIntersect(_generator, SegmentPositions(segmentIndex), start, end, accuracy, _space, epsilon);
+            => SplineUtility.CurveLineIntersect(_generator, SegmentPositions(segmentIndex), start, end, accuracy, _space, epsilon);
 
         public List<Vector3> IntersectionPoints(SplineBase spline, int accuracy)
-            => SplineHelper.SplineSplineIntersectionPoints(this, spline, accuracy);
+            => SplineUtility.SplineSplineIntersectionPoints(this, spline, accuracy);
         public List<Vector3> SegmentIntersectionPoints(int segmentIndex, SplineBase spline, int accuracy)
-            => SplineHelper.CurveSplineIntersectionPoints(_generator, SegmentPositions(segmentIndex), spline, accuracy);
+            => SplineUtility.CurveSplineIntersectionPoints(_generator, SegmentPositions(segmentIndex), spline, accuracy);
 
         public List<Vector3> IntersectionPoints(ISplineGenerator generator, IList<Vector3> points, int accuracy)
-            => SplineHelper.CurveSplineIntersectionPoints(generator, points, this, accuracy);
+            => SplineUtility.CurveSplineIntersectionPoints(generator, points, this, accuracy);
         public List<Vector3> SegmentIntersectionPoints(int segmentIndex, ISplineGenerator generator, IList<Vector3> points, int accuracy)
-            => SplineHelper.CurveSplineIntersectionPoints(_generator, SegmentPositions(segmentIndex), new Spline(generator, false, points), accuracy);
+            => SplineUtility.CurveSplineIntersectionPoints(_generator, SegmentPositions(segmentIndex), new Spline(generator, false, points), accuracy);
 
         public List<Vector3> IntersectionPoints(Vector3 start, Vector3 end, int accuracy)
-            => SplineHelper.SplineLineIntersectionPoints(this, start, end, accuracy);
+            => SplineUtility.SplineLineIntersectionPoints(this, start, end, accuracy);
         public List<Vector3> SegmentIntersectionPoints(int segmentIndex, Vector3 start, Vector3 end, int accuracy)
-            => SplineHelper.CurveLineIntersectionPoints(_generator, SegmentPositions(segmentIndex), start, end, accuracy);
+            => SplineUtility.CurveLineIntersectionPoints(_generator, SegmentPositions(segmentIndex), start, end, accuracy);
         #endregion
 
 
@@ -521,7 +523,7 @@ namespace UnitySplines
             if (_cacher != null && _cacher[segmentIndex].Frames.Count == accuracy) return _cacher[segmentIndex].Frames;
 
             ListSegment<Vector3> segment = _pointPositions[segmentIndex];
-            List<FrenetFrame> frames = SplineHelper.GenerateFrenetFrames(accuracy, _generator, segment);
+            List<FrenetFrame> frames = SplineUtility.GenerateFrenetFrames(accuracy, _generator, segment);
             if (_cacher != null && accuracy == _accuracy) _cacher[segmentIndex].Frames = frames;
             return frames;
         }

@@ -15,24 +15,24 @@ namespace UnitySplines.Bezier
 
         public static Vector3 Evaluate(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            return SplineHelper.Evaluate(t, 0, _characteristicMatrix, p0, p1, p2, p3);
+            return SplineUtility.Evaluate(t, 0, _characteristicMatrix, p0, p1, p2, p3);
         }
 
         public Vector3 Evaluate(float t, IList<Vector3> points)
         {
             if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
-            return SplineHelper.Evaluate(t, 0, _characteristicMatrix, points);
+            return SplineUtility.Evaluate(t, 0, _characteristicMatrix, points);
         }
 
         public static Vector3 EvaluateDerivative(float t, int order, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            return SplineHelper.Evaluate(t, order, _characteristicMatrix, p0, p1, p2, p3);
+            return SplineUtility.Evaluate(t, order, _characteristicMatrix, p0, p1, p2, p3);
         }
 
         public Vector3 EvaluateDerivative(float t, int order, IList<Vector3> points)
         {
             if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
-            return SplineHelper.Evaluate(t, order, _characteristicMatrix, points);
+            return SplineUtility.Evaluate(t, order, _characteristicMatrix, points);
         }
 
         public static IList<float> GetExtremaTs(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
@@ -60,7 +60,7 @@ namespace UnitySplines.Bezier
         public float GetNormalsModifier(Vector3 normal, float t, IList<float> normalAngleOffsets)
         {
             if (normalAngleOffsets.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, normalAngleOffsets.Count, _generatorType, _segmentSize));
-            return SplineHelper.GetNormalsModifier(t, _characteristicMatrix, normalAngleOffsets);
+            return SplineUtility.GetNormalsModifier(t, _characteristicMatrix, normalAngleOffsets);
         }
 
         public IList<Vector3> SplitSegment(float t, IList<Vector3> points)

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UnitySplines
 {
-    public static class SplineHelper
+    public static class SplineUtility
     {
         public static Vector3 ConvertToSpace(Vector3 vec, SplineSpace currentSpace, SplineSpace newSpace)
         {
