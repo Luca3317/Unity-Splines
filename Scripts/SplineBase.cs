@@ -386,6 +386,7 @@ namespace UnitySplines
             _space = SplineSpace.XYZ;
         }
 
+        protected void AddRange(ICollection<Vector3> points) => AddRange(SplineUtility.VectorsToSplinePoints(points));
         protected virtual void AddRange(ICollection<SplinePoint> points)
         {
             List<Vector3> positions = new List<Vector3>();
@@ -403,10 +404,12 @@ namespace UnitySplines
             // TODO this will throw an error if actually adding more than one segment
             if (_cacher != null)
             {
-                _cacher.Insert(SegmentCount - 1);
+                for (int i = 0; i < points.Count / SlideSize; i++)
+                    _cacher.Insert(SegmentCount - 1);
             }
         }
 
+        protected void Add(ICollection<Vector3> points) => AddRange(SplineUtility.VectorsToSplinePoints(points));
         protected virtual void Add(ICollection<SplinePoint> points)
         {
             List<Vector3> positions = new List<Vector3>();
@@ -427,6 +430,7 @@ namespace UnitySplines
             }
         }
 
+        protected void Insert(int i, ICollection<Vector3> points) => Insert(i, SplineUtility.VectorsToSplinePoints(points));
         protected virtual void Insert(int i, ICollection<SplinePoint> points)
         {
             List<Vector3> positions = new List<Vector3>();
@@ -447,6 +451,7 @@ namespace UnitySplines
             }
         }
 
+        protected void InsertRange(int i, ICollection<Vector3> points) => InsertRange(i, SplineUtility.VectorsToSplinePoints(points));
         protected virtual void InsertRange(int i, ICollection<SplinePoint> points)
         {
             List<Vector3> positions = new List<Vector3>();
@@ -463,7 +468,8 @@ namespace UnitySplines
 
             if (_cacher != null)
             {
-                _cacher.Insert(i);
+                for (int j = 0; j < points.Count / SlideSize; j++)
+                    _cacher.Insert(i);
             }
         }
 
