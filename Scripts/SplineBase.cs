@@ -382,6 +382,16 @@ namespace UnitySplines
             _posRotScale = new PosRotScale() { position = Vector3.zero, scale = Vector3.one, rotation = Quaternion.identity };
         }
 
+        protected ReadOnlySpline ToReadOnly_Impl()
+        {
+            ReadOnlySpline spline = new ReadOnlySpline(_generator, false, Points);
+            spline._normalAngleOffset = _normalAngleOffset;
+            spline._accuracy = _accuracy;
+            spline._posRotScale = _posRotScale;
+            spline._space = _space;
+            return spline;
+        }
+
         protected int NeededAccuracy(int accuracy) => accuracy + (SegmentCount - 1) * (accuracy - 1);
 
         // TODO:

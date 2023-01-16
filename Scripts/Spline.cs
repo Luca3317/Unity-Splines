@@ -170,6 +170,8 @@ namespace UnitySplines
             Remove(segmentIndex + 2);
         }
 
+        public ReadOnlySpline ToReadOnly() => ToReadOnly_Impl();
+        
         #region SplinePoints Method Wrappers
         /// <summary>
         /// Appends a new segment to the end of the collection.
@@ -332,97 +334,6 @@ namespace UnitySplines
             }
             _pointPositions.RemoveAtSegment(i);
             _pointNormals.RemoveAtSegment(i);
-        }
-
-    }
-
-    [System.Serializable]
-    public class Spline<T> : Spline where T : new()
-    {
-        public T PointData(int pointIndex) => _pointData.Item(pointIndex);
-        public ListSegment<T> SegmentData(int segmentIndex) => _pointData.Segment(segmentIndex);
-
-        public Spline(ISplineGenerator generator, bool cache, params Vector3[] points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
-        { }
-        public Spline(ISplineGenerator generator, bool cache, IEnumerable<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
-        { }
-        public Spline(ISplineGenerator generator, bool cache, SegmentedCollection<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points.Items))
-        { }
-        public Spline(ISplineGenerator generator, bool cache, params SplinePoint[] points) : base(generator, cache, points)
-        { }
-        public Spline(ISplineGenerator generator, bool cache, IEnumerable<SplinePoint> points) : base(generator, cache, points)
-        { }
-        public Spline(ISplineGenerator generator, bool cache, SegmentedCollection<SplinePoint> points) : base(generator, cache, points)
-        { }
-
-        public override void SetGenerator(ISplineGenerator generator)
-        {
-            if (generator == _generator) return;
-            if (PointCount < generator.SegmentSize) return;
-
-            _generator = generator;
-            _pointPositions.SetSegmentSizes(generator.SegmentSize, generator.SlideSize);
-            _pointNormals.SetSegmentSizes(generator.SegmentSize, generator.SlideSize);
-            _pointData.SetSegmentSizes(generator.SegmentSize, generator.SlideSize);
-            if (_cacher != null)
-            {
-                _cacher.SetSize(SegmentCount);
-                ClearCache();
-            }
-        }
-
-        [SerializeField] protected SegmentedCollection<T> _pointData;
-
-        protected override void InitSpline(ISplineGenerator generator, bool cache, IEnumerable<SplinePoint> points)
-        {
-            base.InitSpline(generator, cache, points);
-
-            List<T> pointsData = new List<T>();
-            for (int i = 0; i < _pointPositions.ItemCount; i++)
-                pointsData.Add(new T());
-
-            _pointData = new SegmentedCollection<T>(generator.SegmentSize, generator.SlideSize, pointsData);
-        }
-
-        protected override void AddRange(ICollection<SplinePoint> points)
-        {
-            base.AddRange(points);
-            MatchData();
-        }
-
-        protected override void Add(ICollection<SplinePoint> points)
-        {
-            base.Add(points);
-            MatchData();
-        }
-
-        protected override void Insert(int i, ICollection<SplinePoint> points)
-        {
-            base.Insert(i, points);
-            MatchData();
-        }
-
-        protected override void InsertRange(int i, ICollection<SplinePoint> points)
-        {
-            base.InsertRange(i, points);
-            MatchData();
-        }
-
-        protected override void Remove(int i)
-        {
-            base.Remove(i);
-            _pointData.RemoveAtSegment(i);
-        }
-
-        private void MatchData()
-        {
-            if (_pointData.ItemCount == _pointPositions.ItemCount) return;
-
-            List<T> data = new List<T>();
-            for (int i = _pointData.ItemCount; i < _pointPositions.ItemCount; i++)
-                data.Add(new T());
-
-            _pointData.AddRange(data);
         }
     }
 }
