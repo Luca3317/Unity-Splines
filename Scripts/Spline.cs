@@ -150,6 +150,104 @@ namespace UnitySplines
         /// <exception cref="InvalidOperationException">Thrown if the collection does not contain at least two segments. It must always contain at least one full segment.</exception>
         public void DeleteSegment(int segmentIndex) => Remove(segmentIndex);
         #endregion
+
+        protected void AddRange(ICollection<Vector3> points) => AddRange(SplineUtility.VectorsToSplinePoints(points));
+        protected virtual void AddRange(ICollection<SplinePoint> points)
+        {
+            List<Vector3> positions = new List<Vector3>();
+            List<float> normalAngles = new List<float>();
+
+            foreach (SplinePoint point in points)
+            {
+                positions.Add(point.Position);
+                normalAngles.Add(point.NormalAngle);
+            }
+
+            _pointPositions.AddRange(positions);
+            _pointNormals.AddRange(normalAngles);
+
+            // TODO this will throw an error if actually adding more than one segment
+            if (_cacher != null)
+            {
+                for (int i = 0; i < points.Count / SlideSize; i++)
+                    _cacher.Insert(SegmentCount - 1);
+            }
+        }
+
+        protected void Add(ICollection<Vector3> points) => Add(SplineUtility.VectorsToSplinePoints(points));
+        protected virtual void Add(ICollection<SplinePoint> points)
+        {
+            List<Vector3> positions = new List<Vector3>();
+            List<float> normalAngles = new List<float>();
+
+            foreach (SplinePoint point in points)
+            {
+                positions.Add(point.Position);
+                normalAngles.Add(point.NormalAngle);
+            }
+
+            _pointPositions.Add(positions);
+            _pointNormals.Add(normalAngles);
+
+            if (_cacher != null)
+            {
+                _cacher.Insert(SegmentCount - 1);
+            }
+        }
+
+        protected void Insert(int i, ICollection<Vector3> points) => Insert(i, SplineUtility.VectorsToSplinePoints(points));
+        protected virtual void Insert(int i, ICollection<SplinePoint> points)
+        {
+            List<Vector3> positions = new List<Vector3>();
+            List<float> normalAngles = new List<float>();
+
+            foreach (SplinePoint point in points)
+            {
+                positions.Add(point.Position);
+                normalAngles.Add(point.NormalAngle);
+            }
+
+            _pointPositions.InsertAtSegment(i, positions);
+            _pointNormals.InsertAtSegment(i, normalAngles);
+
+            if (_cacher != null)
+            {
+                _cacher.Insert(i);
+            }
+        }
+
+        protected void InsertRange(int i, ICollection<Vector3> points) => InsertRange(i, SplineUtility.VectorsToSplinePoints(points));
+        protected virtual void InsertRange(int i, ICollection<SplinePoint> points)
+        {
+            List<Vector3> positions = new List<Vector3>();
+            List<float> normalAngles = new List<float>();
+
+            foreach (SplinePoint point in points)
+            {
+                positions.Add(point.Position);
+                normalAngles.Add(point.NormalAngle);
+            }
+
+            _pointPositions.InsertRangeAtSegment(i, positions);
+            _pointNormals.InsertRangeAtSegment(i, normalAngles);
+
+            if (_cacher != null)
+            {
+                for (int j = 0; j < points.Count / SlideSize; j++)
+                    _cacher.Insert(i);
+            }
+        }
+
+        protected virtual void Remove(int i)
+        {
+            if (_cacher != null)
+            {
+                _cacher.RemoveAt(i);
+            }
+            _pointPositions.RemoveAtSegment(i);
+            _pointNormals.RemoveAtSegment(i);
+        }
+
     }
 
     [System.Serializable]
@@ -157,7 +255,7 @@ namespace UnitySplines
     {
         public T PointData(int pointIndex) => _pointData.Item(pointIndex);
         public ListSegment<T> SegmentData(int segmentIndex) => _pointData.Segment(segmentIndex);
-        
+
         public Spline(ISplineGenerator generator, bool cache, params Vector3[] points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
         { }
         public Spline(ISplineGenerator generator, bool cache, IEnumerable<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
@@ -191,133 +289,54 @@ namespace UnitySplines
 
         protected override void InitSpline(ISplineGenerator generator, bool cache, IEnumerable<SplinePoint> points)
         {
-            List<Vector3> pointsPositions = new List<Vector3>();
-            List<float> pointsNormalAngles = new List<float>();
+            base.InitSpline(generator, cache, points);
+
             List<T> pointsData = new List<T>();
-
-            foreach (SplinePoint pointStruct in points)
-            {
-                pointsPositions.Add(pointStruct.Position);
-                pointsNormalAngles.Add(pointStruct.NormalAngle);
+            for (int i = 0; i < _pointPositions.ItemCount; i++)
                 pointsData.Add(new T());
-            }
 
-            _pointPositions = new SegmentedCollection<Vector3>(generator.SegmentSize, generator.SlideSize, pointsPositions);
-            _pointNormals = new SegmentedCollection<float>(generator.SegmentSize, generator.SlideSize, pointsNormalAngles);
             _pointData = new SegmentedCollection<T>(generator.SegmentSize, generator.SlideSize, pointsData);
-            _generator = generator;
-
-            if (cache)
-            {
-                _cacher = new SplineCacher();
-                for (int i = 0; i < SegmentCount; i++) _cacher.Add();
-            }
-
-            _space = SplineSpace.XYZ;
         }
 
         protected override void AddRange(ICollection<SplinePoint> points)
         {
-            List<Vector3> positions = new List<Vector3>();
-            List<float> normalAngles = new List<float>();
-            List<T> data = new List<T>();
-
-            foreach (SplinePoint point in points)
-            {
-                positions.Add(point.Position);
-                normalAngles.Add(point.NormalAngle);
-                data.Add(new T());
-            }
-
-            _pointPositions.AddRange(positions);
-            _pointNormals.AddRange(normalAngles);
-            _pointData.AddRange(data);
-
-            // TODO this will throw an error if actually adding more than one segment
-            if (_cacher != null)
-            {
-                _cacher.Insert(SegmentCount - 1);
-            }
+            base.AddRange(points);
+            MatchData();
         }
 
         protected override void Add(ICollection<SplinePoint> points)
         {
-            List<Vector3> positions = new List<Vector3>();
-            List<float> normalAngles = new List<float>();
-            List<T> data = new List<T>();
-
-            foreach (SplinePoint point in points)
-            {
-                positions.Add(point.Position);
-                normalAngles.Add(point.NormalAngle);
-                data.Add(new T());
-            }
-
-            _pointPositions.Add(positions);
-            _pointNormals.Add(normalAngles);
-            _pointData.Add(data);
-
-            if (_cacher != null)
-            {
-                _cacher.Insert(SegmentCount - 1);
-            }
+            base.Add(points);
+            MatchData();
         }
 
         protected override void Insert(int i, ICollection<SplinePoint> points)
         {
-            List<Vector3> positions = new List<Vector3>();
-            List<float> normalAngles = new List<float>();
-            List<T> data = new List<T>();
-
-            foreach (SplinePoint point in points)
-            {
-                positions.Add(point.Position);
-                normalAngles.Add(point.NormalAngle);
-                data.Add(new T());
-            }
-
-            _pointPositions.InsertAtSegment(i, positions);
-            _pointNormals.InsertAtSegment(i, normalAngles);
-            _pointData.InsertAtSegment(i, data);
-
-            if (_cacher != null)
-            {
-                _cacher.Insert(i);
-            }
+            base.Insert(i, points);
+            MatchData();
         }
 
         protected override void InsertRange(int i, ICollection<SplinePoint> points)
         {
-            List<Vector3> positions = new List<Vector3>();
-            List<float> normalAngles = new List<float>();
-            List<T> data = new List<T>();
-
-            foreach (SplinePoint point in points)
-            {
-                positions.Add(point.Position);
-                normalAngles.Add(point.NormalAngle);
-                data.Add(new T());
-            }
-
-            _pointPositions.InsertRangeAtSegment(i, positions);
-            _pointNormals.InsertRangeAtSegment(i, normalAngles);
-            _pointData.InsertRangeAtSegment(i, data);
-
-            if (_cacher != null)
-            {
-                _cacher.Insert(i);
-            }
+            base.InsertRange(i, points);
+            MatchData();
         }
 
         protected override void Remove(int i)
         {
-            if (_cacher != null)
-            {
-                _cacher.RemoveAt(i);
-            }
-            _pointPositions.RemoveAtSegment(i);
-            _pointNormals.RemoveAtSegment(i);
+            base.Remove(i);
             _pointData.RemoveAtSegment(i);
+        }
+
+        private void MatchData()
+        {
+            if (_pointData.ItemCount == _pointPositions.ItemCount) return;
+
+            List<T> data = new List<T>();
+            for (int i = _pointData.ItemCount; i < _pointPositions.ItemCount; i++)
+                data.Add(new T());
+
+            _pointData.AddRange(data);
         }
     }
 }
