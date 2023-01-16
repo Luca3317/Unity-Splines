@@ -12,6 +12,10 @@ namespace UnitySplines
         public SplineSpace Space => _space;
         public float NormalAngleOffset => _normalAngleOffset;
 
+        public Vector3 position => _posRotScale.position;
+        public Quaternion rotation => _posRotScale.rotation;
+        public Vector3 scale => _posRotScale.scale;
+
         #region SplinePoints Property Wrappers
         public int SegmentSize => _generator.SegmentSize;
         public int SlideSize => _generator.SlideSize;
@@ -348,6 +352,8 @@ namespace UnitySplines
         [SerializeField] protected SplineCacher _cacher;
 
         [SerializeField] protected SplineSpace _space;
+        [SerializeField] protected PosRotScale _posRotScale;
+
         [SerializeField] protected int _accuracy = 20;
         [SerializeField] protected float _normalAngleOffset;
 
@@ -373,6 +379,7 @@ namespace UnitySplines
             }
 
             _space = SplineSpace.XYZ;
+            _posRotScale = new PosRotScale() { position = Vector3.zero, scale = Vector3.one, rotation = Quaternion.identity };
         }
 
         protected int NeededAccuracy(int accuracy) => accuracy + (SegmentCount - 1) * (accuracy - 1);

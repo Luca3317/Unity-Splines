@@ -59,7 +59,10 @@ namespace UnitySplines
 
         public void SetPointPosition(int pointIndex, Vector3 newPosition)
         {
-            _pointPositions.SetItem(pointIndex, SplineUtility.ConvertToSpace(newPosition, SplineSpace.XYZ, _space));
+            if (_space == SplineSpace.XZ) newPosition.y = _posRotScale.position.y;
+            else if (_space == SplineSpace.XY) newPosition.z = _posRotScale.position.z;
+
+            _pointPositions.SetItem(pointIndex, newPosition);
 
             if (_cacher != null)
             {
@@ -72,6 +75,89 @@ namespace UnitySplines
         public void SetPointNormalAngle(int pointIndex, float newNormalAngle)
         {
             _pointNormals.SetItem(pointIndex, newNormalAngle);
+        }
+
+        public void SetPosition(Vector3 newPosition)
+        {
+            if (_posRotScale.position == newPosition) return;
+
+            PosRotScale newPosRotScale = _posRotScale;
+            newPosRotScale.position = newPosition;
+
+            for (int i = 0; i < _pointPositions.ItemCount; i++)
+            {
+
+                Vector3 pos = _pointPositions.Item(i);
+                pos = SplineUtility.ApplyPosition(pos, -_posRotScale.position);
+                _pointPositions.SetItem(i, SplineUtility.ApplyPosition(pos, newPosition));
+
+            }
+
+            _posRotScale = newPosRotScale;
+            ClearCache();
+        }
+
+        public void SetRotation(Quaternion newRotation)
+        {
+            if (_posRotScale.rotation == newRotation) return;
+            PosRotScale newPosRotScale = _posRotScale;
+            newPosRotScale.rotation = newRotation;
+
+            for (int i = 0; i < _pointPositions.ItemCount; i++)
+            {
+
+                // get current pos
+                Vector3 pos = _pointPositions.Item(i);
+                // Unapply old rotation
+                pos = SplineUtility.ApplyRotation(pos, _posRotScale.position, Quaternion.Inverse(_posRotScale.rotation));
+                // Apply new rotation
+                _pointPositions.SetItem(i, SplineUtility.ApplyRotation(pos, _posRotScale.position, newRotation));
+
+                // Todo combine those two last steps, if sensible
+            }
+
+            _posRotScale = newPosRotScale;
+            ClearCache();
+        }
+
+        public void SetScale(Vector3 newScale)
+        {
+            if (_posRotScale.scale == newScale) return;
+
+            PosRotScale newPosRotScale = _posRotScale;
+            newPosRotScale.scale = newScale;
+
+            Vector3 pivot = GetBounds().center;
+
+
+            for (int i = 0; i < _pointPositions.ItemCount; i++)
+            {
+                // get current pos
+                Vector3 pos = _pointPositions.Item(i);
+                // Unapply old scale
+                // TODO prevent division by 0
+                pos = SplineUtility.ApplyScale(pos, pivot, new Vector3(1f / _posRotScale.scale.x, 1f / _posRotScale.scale.y, 1f / _posRotScale.scale.z));
+                // Apply new rotation
+                _pointPositions.SetItem(i, SplineUtility.ApplyScale(pos, pivot, newScale));
+            }
+
+            _posRotScale = newPosRotScale;
+            ClearCache();
+        }
+
+        public void AlignPosition(Vector3 alignTo)
+        {
+            _posRotScale.position = alignTo;
+        }
+
+        public void AlignRotation(Quaternion alignTo)
+        {
+            _posRotScale.rotation = alignTo;
+        }
+
+        public void AlignScale(Vector3 alignTo)
+        {
+            _posRotScale.scale = alignTo;
         }
 
         public void SplitAt(float t)

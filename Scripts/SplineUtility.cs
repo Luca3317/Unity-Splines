@@ -284,6 +284,63 @@ namespace UnitySplines
             return frame;
         }
 
+        #region PosRotScale
+        public static Vector3 ApplyPosRotScale(Vector3 pointPos, Vector3 pivot, PosRotScale posRotScale)
+        {
+            return ApplyScale(ApplyRotation(ApplyPosition(pointPos, posRotScale), pivot, posRotScale), pivot, posRotScale);
+        }
+
+        public static Vector3 ApplyPosition(Vector3 pointPos, Vector3 position)
+        {
+            return pointPos + position;
+        }
+
+        public static Vector3 ApplyPosition(Vector3 pointPos, PosRotScale posRotScale)
+        {
+            return pointPos + posRotScale.position;
+        }
+
+        public static Vector3 ApplyRotation(Vector3 pointPos, Vector3 pivot, Quaternion rotation)
+        {
+            return RotateAroundPivot(pointPos, pivot, rotation.eulerAngles);
+        }
+
+        public static Vector3 ApplyRotation(Vector3 pointPos, Vector3 pivot, PosRotScale posRotScale)
+        {
+            return RotateAroundPivot(pointPos, pivot, posRotScale.rotation.eulerAngles);
+        }
+
+        public static Vector3 ApplyScale(Vector3 pointPos, Vector3 pivot, Vector3 scale)
+        {
+            Vector3 relativeStartPos = pointPos - pivot;
+            relativeStartPos = new Vector3(relativeStartPos.x * scale.x, relativeStartPos.y * scale.y, relativeStartPos.z * scale.z);
+            return relativeStartPos + pivot;
+        }
+
+        public static Vector3 ApplyScale(Vector3 pointPos, Vector3 pivot, PosRotScale posRotScale)
+        {
+            return ApplyScale(pointPos, pivot, posRotScale.scale);
+        }
+
+        // Any built in way to rotate around a point?
+        private static Vector3 RotateAroundPivot(Vector3 point, Vector3 pivot, Vector3 angles)
+        {
+            Vector3 direction = point - pivot;
+            direction = Quaternion.Euler(angles) * direction;
+            point = direction + pivot;
+            return point;
+        }
+
+        public static Vector3 ApplyPosRotScale(Vector3 point, PosRotScale posRotScale)
+        {
+            return posRotScale.rotation * (point + posRotScale.position);
+        }
+
+        public static Vector3 UnapplyPosRotScale(Vector3 point, PosRotScale posRotScale)
+        {
+            return Quaternion.Inverse(posRotScale.rotation) * (point - posRotScale.position);
+        }
+        #endregion
 
         #region Intersections
         public static bool LinesIntersect(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, SplineSpace dimension)
