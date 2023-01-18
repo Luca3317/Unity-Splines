@@ -4,31 +4,41 @@ using UnityEngine;
 
 namespace UnitySplines.Linear
 {
-    public class LinearGenerator : ISplineGenerator
+    public class LinearGenerator : Singleton<LinearGenerator>, ISplineGenerator
     {
         public int SegmentSize => _segmentSize;
-
         public int SlideSize => _slideSize;
-
         public string GeneratorType => _generatorType;
+
+        public static Vector3 Evaluate(float t, Vector3 start, Vector3 end) => start * (1 - t) + end * t;
+
+        public static Vector3 EvaluateDerivative(float t, int order, Vector3 start, Vector3 end)
+        {
+            if (order < 0 || order > 2) throw new System.ArgumentOutOfRangeException();
+            else if (order == 0) return Evaluate(t, start, end);
+            else if (order == 1) return -start + end;
+            return Vector3.zero;
+        }
+
+        public static IList<float> GetExtremaTs(Vector3 start, Vector3 end) => new float[] { 0f, 1f };
+
+        public static float GetNormalsModifier(Vector3 normal, float t, float startNormalAngleOffset, float endNormalAngleOffset) => startNormalAngleOffset * (1 - t) + startNormalAngleOffset * t;
 
         public Vector3 Evaluate(float t, IList<Vector3> points)
         {
-            if (points.Count != _segmentSize) throw new System.ArgumentException();
-            return points[0] * (1-t) + points[1] * t;
+            if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
+            return points[0] * (1 - t) + points[1] * t;
         }
 
         public Vector3 EvaluateDerivative(float t, int order, IList<Vector3> points)
         {
-            if (points.Count != _segmentSize) throw new System.ArgumentException();
-            if (order < 0 || order > 2) throw new System.ArgumentOutOfRangeException();
-            else if (order == 0) return Evaluate(t, points);
-            else if (order == 1) return -points[0] + points[1];
-            return Vector3.zero;
+            if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
+            return EvaluateDerivative(t, order, points[0], points[1]);
         }
-
+  
         public IList<float> GetExtremaTs(IList<Vector3> points)
         {
+            if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
             return new float[] { 0f, 1f };
         }
 
@@ -38,19 +48,14 @@ namespace UnitySplines.Linear
             return normalAngleOffsets[0] * (1 - t) + normalAngleOffsets[1] * t;
         }
 
-        public IList<Vector3> SplitSegment(float t, IList<Vector3> points)
+        public (int firstSegmentIndex, IList<Vector3> newSegments) SplitSegment(float t, int segmentIndex, SplineBase spline)
         {
-            if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
-
-            Vector3 point0 = points[0], point1 = points[1];
-            Vector3 splitPoint = Evaluate(t, points);
-
-            List<Vector3> newPoints = new List<Vector3>();
-            newPoints.Add(point0);
-            newPoints.Add(splitPoint);
-            newPoints.Add(point1);
-            return newPoints;
+            IList<Vector3> segment = new List<Vector3>(spline.SegmentPositions(segmentIndex));
+            segment.Insert(1, Evaluate(t, segment));
+            return (segmentIndex, segment);
         }
+
+        private LinearGenerator() { }
 
         private const int _segmentSize = 2;
         private const int _slideSize = 1;

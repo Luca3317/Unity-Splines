@@ -4,36 +4,17 @@ using UnityEngine;
 
 namespace UnitySplines.Bezier
 {
-    public class BezierGenerator : ISplineGenerator
+    public class BezierGenerator : Singleton<BezierGenerator>, ISplineGenerator
     {
         public int SegmentSize => _segmentSize;
         public int SlideSize => _slideSize;
-
         public string GeneratorType => _generatorType;
 
-        public Matrix4x4 CharacteristicMatrix => _characteristicMatrix;
+        public static Vector3 Evaluate(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3) 
+            => SplineUtility.Evaluate(t, 0, _characteristicMatrix, p0, p1, p2, p3);
 
-        public static Vector3 Evaluate(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
-        {
-            return SplineUtility.Evaluate(t, 0, _characteristicMatrix, p0, p1, p2, p3);
-        }
-
-        public Vector3 Evaluate(float t, IList<Vector3> points)
-        {
-            if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
-            return SplineUtility.Evaluate(t, 0, _characteristicMatrix, points);
-        }
-
-        public static Vector3 EvaluateDerivative(float t, int order, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
-        {
-            return SplineUtility.Evaluate(t, order, _characteristicMatrix, p0, p1, p2, p3);
-        }
-
-        public Vector3 EvaluateDerivative(float t, int order, IList<Vector3> points)
-        {
-            if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
-            return SplineUtility.Evaluate(t, order, _characteristicMatrix, points);
-        }
+        public static Vector3 EvaluateDerivative(float t, int order, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3) 
+            => SplineUtility.Evaluate(t, order, _characteristicMatrix, p0, p1, p2, p3);
 
         public static IList<float> GetExtremaTs(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
@@ -51,6 +32,38 @@ namespace UnitySplines.Bezier
             return new float[] { tx1, tx2, ty1, ty2, tz1, tz2 };
         }
 
+        public static float GetNormalsModifier(Vector3 normal, float t, float offset0, float offset1, float offset2, float offset3)
+            => SplineUtility.GetNormalsModifier(t, _characteristicMatrix, offset0, offset1, offset2, offset3);
+
+        public static IList<Vector3> SplitSegment(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            Vector3 splitPoint = Evaluate(t, p0, p1, p2, p3);
+
+            float t2 = t * t;
+            float mt2 = (t - 1) * (t - 1);
+            List<Vector3> newPoints = new List<Vector3>();
+            newPoints.Add(p0);
+            newPoints.Add(t * p1 - (t - 1) * p0);
+            newPoints.Add(t2 * p2 - 2 * (t2 - t) * p1 + mt2 * p0);
+            newPoints.Add(splitPoint);
+            newPoints.Add(t2 * p3 - 2 * (t2 - t) * p2 + mt2 * p1);
+            newPoints.Add(t * p3 - (t - 1) * p2);
+
+            return newPoints;
+        }
+
+        public Vector3 Evaluate(float t, IList<Vector3> points)
+        {
+            if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
+            return SplineUtility.Evaluate(t, 0, _characteristicMatrix, points);
+        }
+
+        public Vector3 EvaluateDerivative(float t, int order, IList<Vector3> points)
+        {
+            if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
+            return SplineUtility.Evaluate(t, order, _characteristicMatrix, points);
+        }
+
         public IList<float> GetExtremaTs(IList<Vector3> points)
         {
             if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
@@ -63,30 +76,13 @@ namespace UnitySplines.Bezier
             return SplineUtility.GetNormalsModifier(t, _characteristicMatrix, normalAngleOffsets);
         }
 
-        public IList<Vector3> SplitSegment(float t, IList<Vector3> points)
+        public (int firstSegmentIndex, IList<Vector3> newSegments) SplitSegment(float t, int segmentIndex, SplineBase spline)
         {
-            if (points.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, points.Count, _generatorType, _segmentSize));
-
-            Vector3 point0 = points[0];
-            Vector3 point1 = points[1];
-            Vector3 point2 = points[2];
-            Vector3 point3 = points[3];
-
-            Vector3 splitPoint = Evaluate(t, points);
-
-            float t2 = t * t;
-            float mt2 = (t - 1) * (t - 1);
-            List<Vector3> newPoints = new List<Vector3>();
-            newPoints.Add(point0);
-            newPoints.Add(t * point1 - (t - 1) * point0);
-            newPoints.Add(t2 * point2 - 2 * (t2 - t) * point1 + mt2 * point0);
-            newPoints.Add(splitPoint);
-            newPoints.Add(t2 * point3 - 2 * (t2 - t) * point2 + mt2 * point1);
-            newPoints.Add(t * point3 - (t - 1) * point2);
-            newPoints.Add(point3);
-
-            return newPoints;
+            IList<Vector3> segment = spline.SegmentPositions(segmentIndex);
+            return (segmentIndex, SplitSegment(t, segment[0], segment[1], segment[2], segment[3]));
         }
+
+        private BezierGenerator() { }
 
         private const int _segmentSize = 4;
         private const int _slideSize = 3;

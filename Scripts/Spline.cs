@@ -160,18 +160,44 @@ namespace UnitySplines
             _posRotScale.scale = alignTo;
         }
 
+        /// <summary>
+        /// Splits the spline's segment at t in two (approximately) equivalent segments.
+        /// </summary>
+        /// <param name="t"></param>
         public void SplitAt(float t)
         {
             (int segmentIndex, float segmentT) = SplineUtility.PercentageToSegmentPercentage(t);
 
-            IList<Vector3> newSegments = _generator.SplitSegment(segmentT, _pointPositions.Segment(segmentIndex));
-            newSegments.RemoveAt(newSegments.Count - 1);
-            InsertRange(segmentIndex, newSegments);
-            Remove(segmentIndex + 2);
+            (int firstSegmentIndex, IList<Vector3> newSegments) =
+                _generator.SplitSegment(segmentT, segmentIndex, ToReadOnly());
+
+            // TODO: Further test the second part of this check
+            if (newSegments.Count < SlideSize || newSegments.Count > PointCount - firstSegmentIndex * SlideSize + SlideSize)
+                throw new System.InvalidOperationException(string.Format(_splitSegmentFaultyAmountErrorMessage, _generator.GeneratorType, newSegments.Count, SlideSize, PointCount - firstSegmentIndex * SlideSize + SlideSize));
+
+            // TODO: Maybe remove these; would put responsibility on generator
+            firstSegmentIndex = Mathf.Max(firstSegmentIndex, 0);
+            firstSegmentIndex = Mathf.Min(firstSegmentIndex, SegmentCount - 1);
+
+            // Create a list with newSegment's elements to use GetRange
+            // TODO: Potentially make SplitSegment return List to save the allocation
+            List<Vector3> segments = new List<Vector3>(newSegments);
+
+            // Insert the first segment
+            Insert(firstSegmentIndex, segments.GetRange(0, _generator.SlideSize));
+
+            // Set the rest of the contained points
+            // Doing this instead of inserting allows SplitSegment to return any amount of points
+            // larger than or equal to slideSize and smaller than (PointCount - 1) - firstSegmentIndex * slideSize
+            for (int i = _generator.SlideSize; i < segments.Count; i++)
+            {
+                _pointPositions.SetItem(segmentIndex * _generator.SlideSize + i, segments[i]);
+            }
+            ClearCache();
         }
 
         public ReadOnlySpline ToReadOnly() => ToReadOnly_Impl();
-        
+
         #region SplinePoints Method Wrappers
         /// <summary>
         /// Appends a new segment to the end of the collection.
@@ -335,5 +361,7 @@ namespace UnitySplines
             _pointPositions.RemoveAtSegment(i);
             _pointNormals.RemoveAtSegment(i);
         }
+
+        private const string _splitSegmentFaultyAmountErrorMessage = "SplitSegment of generator \"{0}\" returned with invalid amount of points. Returned {1} points, but expected were between {2} and {3}";
     }
 }
