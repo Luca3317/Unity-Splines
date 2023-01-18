@@ -13,18 +13,17 @@ public static class MathUtility
     {
         List<int> indeces = new List<int>();
 
-        int firstIndex = pointIndex - pointIndex % slideSize;
-        int lastIndex = firstIndex + slideSize;
+        int firstSegmentIndex = PointToFirstSegmentIndex(pointIndex, segmentSize, slideSize);
+        int firstIndex = firstSegmentIndex * slideSize;
 
-        while (pointIndex <= lastIndex)
+        while (firstIndex <= pointIndex)
         {
-            indeces.Add(PointToFirstSegmentIndex(pointIndex, segmentSize, slideSize));
-            pointIndex += slideSize;
+            indeces.Add(firstSegmentIndex++);
+            firstIndex += slideSize;
         }
 
         return indeces;
     }
-
     public static int PointToFirstSegmentIndex(int pointIndex, int segmentSize, int slideSize) => pointIndex < segmentSize ? 0 : (pointIndex - segmentSize) / slideSize + 1;
     /// <summary>
     /// Converts a segment index to the corresponding point index.
