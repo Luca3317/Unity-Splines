@@ -425,7 +425,8 @@ namespace UnitySplines
             List<FrenetFrame> frames = new List<FrenetFrame>();
             for (int i = 0; i < SegmentCount - 1; i++)
             {
-                frames.AddRange(GenerateSegmentFrenetFrames(i, accuracy));
+                frames.AddRange(GenerateSegmentFrenetFrames(i, accuracy, initialOrientation));
+                initialOrientation = frames[frames.Count - 1];
                 frames.RemoveAt(frames.Count - 1);
             }
             frames.AddRange(GenerateSegmentFrenetFrames(SegmentCount - 1, accuracy));
@@ -440,7 +441,7 @@ namespace UnitySplines
             if (_cacher != null && _cacher[segmentIndex].Frames.Count == accuracy) return _cacher[segmentIndex].Frames;
 
             ListSegment<Vector3> segment = _pointPositions[segmentIndex];
-            List<FrenetFrame> frames = SplineUtility.GenerateFrenetFrames(accuracy, _generator, segment);
+            List<FrenetFrame> frames = (List<FrenetFrame>)SplineUtility.GenerateFrenetFrames(accuracy, _generator, segment);
             if (_cacher != null && accuracy == _accuracy) _cacher[segmentIndex].Frames = frames;
             return frames;
         }
