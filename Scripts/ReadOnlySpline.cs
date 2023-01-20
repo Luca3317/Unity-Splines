@@ -11,7 +11,7 @@ namespace UnitySplines
         { }
         public ReadOnlySpline(ISplineGenerator generator, bool cache, IEnumerable<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
         { }
-        public ReadOnlySpline(ISplineGenerator generator, bool cache, SegmentedCollection<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points.Items))
+        public ReadOnlySpline(ISplineGenerator generator, bool cache, SegmentedCollection<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
         { }
         public ReadOnlySpline(ISplineGenerator generator, bool cache, params SplinePoint[] points) : base(generator, cache, points)
         { }

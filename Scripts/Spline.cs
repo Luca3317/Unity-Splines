@@ -11,7 +11,7 @@ namespace UnitySplines
         { }
         public Spline(ISplineGenerator generator, bool cache, IEnumerable<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
         { }
-        public Spline(ISplineGenerator generator, bool cache, SegmentedCollection<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points.Items))
+        public Spline(ISplineGenerator generator, bool cache, SegmentedCollection<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
         { }
         public Spline(ISplineGenerator generator, bool cache, params SplinePoint[] points) : base(generator, cache, points)
         { }
@@ -71,7 +71,7 @@ namespace UnitySplines
             if (_space == newSpace) return;
 
             for (int i = 0; i < PointCount; i++)
-                _pointPositions.SetItem(i, SplineUtility.ConvertToSpace(_pointPositions.Item(i), _space, newSpace));
+                _pointPositions.SetItem(i, SplineUtility.ConvertToSpace(_pointPositions[i], _space, newSpace));
 
             if (newSpace == SplineSpace.XY) _posRotScale.rotation.eulerAngles = new Vector3(0f, 0f, _posRotScale.rotation.eulerAngles.z);
             else if (newSpace == SplineSpace.XZ) _posRotScale.rotation.eulerAngles = new Vector3(0f, _posRotScale.rotation.eulerAngles.y, 0f);
@@ -87,10 +87,10 @@ namespace UnitySplines
             PosRotScale newPosRotScale = _posRotScale;
             newPosRotScale.position = newPosition;
 
-            for (int i = 0; i < _pointPositions.ItemCount; i++)
+            for (int i = 0; i < _pointPositions.Count; i++)
             {
                 // Get current position
-                Vector3 pos = _pointPositions.Item(i);
+                Vector3 pos = _pointPositions[i];
                 // Unapply current position
                 pos = SplineUtility.ApplyPosition(pos, -_posRotScale.position);
                 // Apply new position and set
@@ -111,10 +111,10 @@ namespace UnitySplines
             PosRotScale newPosRotScale = _posRotScale;
             newPosRotScale.rotation = newRotation;
 
-            for (int i = 0; i < _pointPositions.ItemCount; i++)
+            for (int i = 0; i < _pointPositions.Count; i++)
             {
                 // Get current rotation
-                Vector3 pos = _pointPositions.Item(i);
+                Vector3 pos = _pointPositions[i];
                 // Unapply current rotation
                 pos = SplineUtility.ApplyRotation(pos, GetBounds().center, Quaternion.Inverse(_posRotScale.rotation));
                 // Apply new rotation and set
@@ -131,10 +131,10 @@ namespace UnitySplines
 
             Vector3 pivot = GetBounds().center;
 
-            for (int i = 0; i < _pointPositions.ItemCount; i++)
+            for (int i = 0; i < _pointPositions.Count; i++)
             {
                 // Get current scale
-                Vector3 pos = _pointPositions.Item(i);
+                Vector3 pos = _pointPositions[i];
                 // Unapply current scale
                 // TODO prevent division by 0
                 pos = SplineUtility.ApplyScale(pos, pivot, new Vector3(1f / _posRotScale.scale.x, 1f / _posRotScale.scale.y, 1f / _posRotScale.scale.z));
@@ -285,8 +285,8 @@ namespace UnitySplines
                 normalAngles.Add(point.NormalAngle);
             }
 
-            _pointPositions.AddRange(positions);
-            _pointNormals.AddRange(normalAngles);
+            _pointPositions.AddSegmentRange(positions);
+            _pointNormals.AddSegmentRange(normalAngles);
 
             // TODO this will throw an error if actually adding more than one segment
             if (_cacher != null)
@@ -310,8 +310,8 @@ namespace UnitySplines
                 normalAngles.Add(point.NormalAngle);
             }
 
-            _pointPositions.Add(positions);
-            _pointNormals.Add(normalAngles);
+            _pointPositions.AddSegment(positions);
+            _pointNormals.AddSegment(normalAngles);
 
             if (_cacher != null)
             {
@@ -333,8 +333,8 @@ namespace UnitySplines
                 normalAngles.Add(point.NormalAngle);
             }
 
-            _pointPositions.InsertAtSegment(i, positions);
-            _pointNormals.InsertAtSegment(i, normalAngles);
+            _pointPositions.InsertSegment(i, positions);
+            _pointNormals.InsertSegment(i, normalAngles);
 
             if (_cacher != null)
             {
@@ -356,8 +356,8 @@ namespace UnitySplines
                 normalAngles.Add(point.NormalAngle);
             }
 
-            _pointPositions.InsertRangeAtSegment(i, positions);
-            _pointNormals.InsertRangeAtSegment(i, normalAngles);
+            _pointPositions.InsertSegmentRange(i, positions);
+            _pointNormals.InsertSegmentRange(i, normalAngles);
 
             if (_cacher != null)
             {
@@ -372,8 +372,8 @@ namespace UnitySplines
             {
                 _cacher.RemoveAt(i);
             }
-            _pointPositions.RemoveAtSegment(i);
-            _pointNormals.RemoveAtSegment(i);
+            _pointPositions.RemoveSegmentAt(i);
+            _pointNormals.RemoveSegmentAt(i);
         }
 
         private const string _splitSegmentFaultyAmountErrorMessage = "SplitSegment of generator \"{0}\" returned with invalid amount of points. Returned {1} points, but expected were between {2} and {3}";

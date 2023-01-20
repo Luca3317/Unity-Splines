@@ -23,25 +23,41 @@ namespace UnitySplines
         /// <summary>
         /// Returns the amount of points in the collection.
         /// </summary>
-        public int PointCount => _pointPositions.ItemCount;
+        public int PointCount => _pointPositions.Count;
         /// <summary>
         /// Return the amount of segments in the collection.
         /// </summary>
         public int SegmentCount => _pointPositions.SegmentCount;
 
-        public Vector3 PointPosition(int pointIndex) => _pointPositions.Item(pointIndex);
-        public float PointNormal(int pointIndex) => _pointNormals.Item(pointIndex);
+        public Vector3 PointPosition(int pointIndex) => _pointPositions[pointIndex];
+        public float PointNormal(int pointIndex) => _pointNormals[pointIndex];
 
         public ListSegment<Vector3> SegmentPositions(int segmentIndex) => _pointPositions.Segment(segmentIndex);
         public ListSegment<float> SegmentNormals(int segmentIndex) => _pointNormals.Segment(segmentIndex);
+
+        public IEnumerable<Vector3> PointsPositions
+        {
+            get
+            {
+                for (int i = 0; i < PointCount; i++) yield return _pointPositions[i];
+            }
+        }
+
+        public IEnumerable<SplinePoint> Points
+        {
+            get
+            {
+                for (int i = 0; i < PointCount; i++) yield return new SplinePoint(_pointPositions[i], _pointNormals[i]);
+            }
+        }
         #endregion
 
         public SplineBase(ISplineGenerator generator, bool cache, params Vector3[] points) => InitSpline(generator, cache, SplineUtility.VectorsToSplinePoints(points));
         public SplineBase(ISplineGenerator generator, bool cache, IEnumerable<Vector3> points) => InitSpline(generator, cache, SplineUtility.VectorsToSplinePoints(points));
-        public SplineBase(ISplineGenerator generator, bool cache, SegmentedCollection<Vector3> points) => InitSpline(generator, cache, SplineUtility.VectorsToSplinePoints(points.Items));
+        public SplineBase(ISplineGenerator generator, bool cache, SegmentedCollection<Vector3> points) => InitSpline(generator, cache, SplineUtility.VectorsToSplinePoints(points));
         public SplineBase(ISplineGenerator generator, bool cache, params SplinePoint[] points) => InitSpline(generator, cache, points);
         public SplineBase(ISplineGenerator generator, bool cache, IEnumerable<SplinePoint> points) => InitSpline(generator, cache, points);
-        public SplineBase(ISplineGenerator generator, bool cache, SegmentedCollection<SplinePoint> points) => InitSpline(generator, cache, points.Items);
+        public SplineBase(ISplineGenerator generator, bool cache, SegmentedCollection<SplinePoint> points) => InitSpline(generator, cache, points);
 
         public Vector3 ValueAt(float t)
         {
@@ -404,7 +420,7 @@ namespace UnitySplines
             IReadOnlyList<Vector3> flattened = GetFlattened(accuracy);
             List<float> distances = new List<float>();
 
-            Vector3 prevPos = _pointPositions.Item(0);
+            Vector3 prevPos = _pointPositions[0];
             float cumulativeDistance = 0f;
             for (int i = 0; i < flattened.Count; i++)
             {
@@ -440,7 +456,7 @@ namespace UnitySplines
         {
             if (_cacher != null && _cacher[segmentIndex].Frames.Count == accuracy) return _cacher[segmentIndex].Frames;
 
-            ListSegment<Vector3> segment = _pointPositions[segmentIndex];
+            ListSegment<Vector3> segment = _pointPositions.Segment(segmentIndex);
             List<FrenetFrame> frames = (List<FrenetFrame>)SplineUtility.GenerateFrenetFrames(accuracy, _generator, segment);
             if (_cacher != null && accuracy == _accuracy) _cacher[segmentIndex].Frames = frames;
             return frames;
