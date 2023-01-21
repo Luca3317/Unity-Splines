@@ -223,7 +223,7 @@ namespace UnitySplines
             IReadOnlyList<Vector3> flattened = GetFlattened(accuracy, generator, points);
             List<float> distances = new List<float>();
 
-            Vector3 prevPos = points[0];
+            Vector3 prevPos = generator.Evaluate(0, points);
             float cumulativeDistance = startingDistance;
             for (int i = 0; i < flattened.Count; i++)
             {
