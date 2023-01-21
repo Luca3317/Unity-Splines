@@ -71,7 +71,7 @@ namespace UnitySplines
             if (_space == newSpace) return;
 
             for (int i = 0; i < PointCount; i++)
-                _pointPositions.SetItem(i, SplineUtility.ConvertToSpace(_pointPositions[i], _space, newSpace));
+                _pointPositions.SetItem(i, SplineUtility.ConvertToSpace(_pointPositions[i], _posRotScale.position, _space, newSpace));
 
             if (newSpace == SplineSpace.XY) _posRotScale.rotation.eulerAngles = new Vector3(0f, 0f, _posRotScale.rotation.eulerAngles.z);
             else if (newSpace == SplineSpace.XZ) _posRotScale.rotation.eulerAngles = new Vector3(0f, _posRotScale.rotation.eulerAngles.y, 0f);

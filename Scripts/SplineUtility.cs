@@ -6,7 +6,8 @@ namespace UnitySplines
 {
     public static class SplineUtility
     {
-        public static Vector3 ConvertToSpace(Vector3 vec, SplineSpace currentSpace, SplineSpace newSpace)
+        public static Vector3 ConvertToSpace(Vector3 vec, SplineSpace currentSpace, SplineSpace newSpace) => ConvertToSpace(vec, Vector3.zero, currentSpace, newSpace);
+        public static Vector3 ConvertToSpace(Vector3 vec, Vector3 splinePosition, SplineSpace currentSpace, SplineSpace newSpace)
         {
             if (newSpace == currentSpace) return vec;
 
@@ -15,24 +16,24 @@ namespace UnitySplines
             {
                 if (currentSpace == SplineSpace.XYZ)
                 {
-                    newPosition.z = 0f;
+                    newPosition.z = splinePosition.z;
                 }
                 else
                 {
                     newPosition.y = vec.z;
-                    newPosition.z = 0f;
+                    newPosition.z = splinePosition.z;
                 }
             }
             else if (newSpace == SplineSpace.XZ)
             {
                 if (currentSpace == SplineSpace.XYZ)
                 {
-                    newPosition.y = 0f;
+                    newPosition.y = splinePosition.y;
                 }
                 else
                 {
                     newPosition.z = vec.y;
-                    newPosition.y = 0f;
+                    newPosition.y = splinePosition.y;
                 }
             }
 
