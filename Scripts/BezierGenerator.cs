@@ -73,7 +73,7 @@ namespace UnitySplines.Bezier
         public float GetNormalsModifier(Vector3 normal, float t, IList<float> normalAngleOffsets)
         {
             if (normalAngleOffsets.Count != _segmentSize) throw new System.ArgumentException(string.Format(ISplineGenerator._pointAmountErrorMessage, normalAngleOffsets.Count, _generatorType, _segmentSize));
-            return SplineUtility.GetNormalsModifier(t, _characteristicMatrix, normalAngleOffsets);
+            return (1 - t) * normalAngleOffsets[0] + t * normalAngleOffsets[3];
         }
 
         public (int firstSegmentIndex, IList<Vector3> newSegments) SplitSegment(float t, int segmentIndex, SplineBase spline)
