@@ -436,7 +436,7 @@ namespace UnitySplines
         private List<FrenetFrame> GenerateFrenetFrames() => GenerateFrenetFrames(_accuracy);
         private List<FrenetFrame> GenerateFrenetFrames(int accuracy, FrenetFrame? initialOrientation = null)
         {
-            if (_cacher != null && _cacher.Frames.Count == NeededAccuracy(accuracy)) return _cacher.Frames;
+            if (_cacher != null && _cacher.Frames.Count == NeededAccuracy(accuracy) && (initialOrientation == null || _cacher.Frames[0] == initialOrientation)) return _cacher.Frames;
 
             List<FrenetFrame> frames = new List<FrenetFrame>();
             for (int i = 0; i < SegmentCount - 1; i++)
@@ -445,7 +445,7 @@ namespace UnitySplines
                 initialOrientation = frames[frames.Count - 1];
                 frames.RemoveAt(frames.Count - 1);
             }
-            frames.AddRange(GenerateSegmentFrenetFrames(SegmentCount - 1, accuracy));
+            frames.AddRange(GenerateSegmentFrenetFrames(SegmentCount - 1, accuracy, initialOrientation));
 
             if (_cacher != null && accuracy == _accuracy) _cacher.Frames = frames;
             return frames;
@@ -454,10 +454,10 @@ namespace UnitySplines
         private List<FrenetFrame> GenerateSegmentFrenetFrames(int segmentIndex) => GenerateSegmentFrenetFrames(segmentIndex, _accuracy);
         private List<FrenetFrame> GenerateSegmentFrenetFrames(int segmentIndex, int accuracy, FrenetFrame? initialOrientation = null)
         {
-            if (_cacher != null && _cacher[segmentIndex].Frames.Count == accuracy) return _cacher[segmentIndex].Frames;
+            if (_cacher != null && _cacher[segmentIndex].Frames.Count == accuracy && (initialOrientation == null || _cacher[segmentIndex].Frames[0] == initialOrientation)) return _cacher[segmentIndex].Frames;
 
             ListSegment<Vector3> segment = _pointPositions.Segment(segmentIndex);
-            List<FrenetFrame> frames = (List<FrenetFrame>)SplineUtility.GenerateFrenetFrames(accuracy, _generator, segment);
+            List<FrenetFrame> frames = (List<FrenetFrame>)SplineUtility.GenerateFrenetFrames(accuracy, _generator, segment, initialOrientation);
             if (_cacher != null && accuracy == _accuracy) _cacher[segmentIndex].Frames = frames;
             return frames;
         }
