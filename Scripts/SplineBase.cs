@@ -75,9 +75,9 @@ namespace UnitySplines
             return _generator.EvaluateDerivative(segmentT, 1, segment);
         }
 
-        public Vector3 NormalAt(float t, bool alignNormalsToCurveOrientation = false, FrenetFrame? initialOrientation = null)
+        public Vector3 NormalAt(float t, bool alignNormalsToCurveOrientation = true, FrenetFrame? initialOrientation = null)
                   => NormalAt(t, _accuracy, alignNormalsToCurveOrientation, initialOrientation);
-        public Vector3 NormalAt(float t, int accuracy, bool alignNormalsToCurveOrientation = false, FrenetFrame? initialOrientation = null)
+        public Vector3 NormalAt(float t, int accuracy, bool alignNormalsToCurveOrientation = true, FrenetFrame? initialOrientation = null)
         {
             Vector3 tangent = TangentAt(t);
             (int segmentIndex, float segmentT) = SplineUtility.PercentageToSegmentPercentage(t);
@@ -90,28 +90,28 @@ namespace UnitySplines
                     xt = tangent.x / tangent.magnitude;
                     yt = tangent.y / tangent.magnitude;
                     normal = new Vector3(yt, -xt, 0f);
-                    float normalModifier = _generator.GetNormalsModifier(normal, t, _pointNormals.Segment(segmentIndex));
+                    float normalModifier = _generator.GetNormalsModifier(normal, segmentT, _pointNormals.Segment(segmentIndex));
                     return Quaternion.AngleAxis((_normalAngleOffset + normalModifier) % 360, tangent) * normal;
 
                 case SplineSpace.XZ:
                     xt = tangent.x / tangent.magnitude;
                     zt = tangent.z / tangent.magnitude;
                     normal = new Vector3(-zt, 0f, xt);
-                    normalModifier = _generator.GetNormalsModifier(normal, t, _pointNormals.Segment(segmentIndex));
+                    normalModifier = _generator.GetNormalsModifier(normal, segmentT, _pointNormals.Segment(segmentIndex));
                     return Quaternion.AngleAxis((_normalAngleOffset + normalModifier) % 360, tangent) * normal;
 
                 default:
 
                     if (alignNormalsToCurveOrientation)
                     {
-                        normal = GetFrenetFrameAt(t, accuracy).normal; // t, accuracy, initialOrientation
+                        normal = GetFrenetFrameAt(t, accuracy, initialOrientation).normal; // t, accuracy, initialOrientation
                     }
                     else
                     {
                         normal = Vector3.Cross(Vector3.up, tangent);
                     }
 
-                    normalModifier = _generator.GetNormalsModifier(normal, t, _pointNormals.Segment(segmentIndex));
+                    normalModifier = _generator.GetNormalsModifier(normal, segmentT, _pointNormals.Segment(segmentIndex));
                     return Quaternion.AngleAxis((_normalAngleOffset + normalModifier) % 360, tangent) * normal;
             }
         }
