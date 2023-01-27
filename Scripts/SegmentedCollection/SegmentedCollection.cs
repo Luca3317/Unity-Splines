@@ -156,7 +156,11 @@ namespace UnitySplines
             if (segmentSize < slideSize) throw new System.ArgumentException(string.Format(_segmentSizeSmallerThanSlideErrorMsg));
             if (_items.Count < segmentSize) throw new System.ArgumentException(string.Format(_tooFewItemsToConvertErrorMsg, _items.Count, segmentSize));
 
-            RemoveSegmentRange(_items.Count - (_items.Count - segmentSize) % slideSize, (_items.Count - segmentSize) % slideSize);
+            int count = (_items.Count - segmentSize) % slideSize;
+            for (int i = 0; i < count; i++)
+            {
+                _items.RemoveAt(_items.Count - 1);
+            }
 
             _segmentSize = segmentSize;
             _slideSize = slideSize;
