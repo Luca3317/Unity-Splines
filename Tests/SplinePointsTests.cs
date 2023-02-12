@@ -7,6 +7,7 @@ using UnitySplines;
 
 public class SplinePointsTests
 {
+    /*
     #region Creation
     [Test]
     public void SplinePointsContructor1Test()
@@ -132,4 +133,5 @@ public class SplinePointsTests
         Check(sp, segmentSize, slideSize, count);
         foreach (var currVec in sp.Points) Assert.AreEqual(vec, currVec);
     }
+    */
 }

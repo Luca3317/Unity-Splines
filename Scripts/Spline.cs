@@ -7,6 +7,7 @@ namespace UnitySplines
     [System.Serializable]
     public class Spline : SplineBase
     {
+        public Spline() : base() { }
         public Spline(ISplineGenerator generator, bool cache, params Vector3[] points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
         { }
         public Spline(ISplineGenerator generator, bool cache, IEnumerable<Vector3> points) : base(generator, cache, SplineUtility.VectorsToSplinePoints(points))
@@ -37,7 +38,7 @@ namespace UnitySplines
                 IEnumerable<int> segmentIndeces = _pointPositions.SegmentIndecesOf(pointIndex);
 
                 foreach (int segmentIndex in segmentIndeces)
-                {
+                { 
                     if (segmentIndex > SegmentCount - 1)
                         break;
                     _cacher[segmentIndex].Clear();
@@ -66,7 +67,7 @@ namespace UnitySplines
             }
         }
 
-        public void SetSpace(SplineSpace newSpace)
+        public void SetSpace(SplineSpace newSpace) 
         {
             if (_space == newSpace) return;
 

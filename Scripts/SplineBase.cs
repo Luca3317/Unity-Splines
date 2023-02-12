@@ -4,6 +4,74 @@ using UnityEngine;
 
 namespace UnitySplines
 {
+    /*
+     * 
+     * TODO
+     *      Spline space 14.1 DONE
+     *      NormalAt (should probably be in generator; also pass splinespace as argument) 14.1 DONE
+     *      Should do: there seems to be a bug with segmentwise extrema/bounds (or beziers getextrema?); chech that out DONE
+     *      shoudld do: improve distancetoto time performance (ie binary search) DONE
+     *          
+     *      Intersections 15.1 DONE
+     *      SplitAt (probably must go in the generator as well) 15.1 DONE
+     *      Should do now: refactor and clean up intersection code DONE
+     *      Refactor splines insertion/add/remove again; DONE (but: didnt refactor but simply added IList<Vector3> wrapper)
+     *      Spline transform 15.1 DONE
+     *      
+     *      16.1 tried to figure out hermite and new splitat logic; I think it mostly works now DONE
+     *      Create Hermite generator 16.1 DONE
+     *      
+     *      Create structure (ie base class) to make generators singleton 17.1 DONE
+     *      Add: Cardinal Spline, Catmull Rom Spline 17.1 DONE
+     *      apply space to newly added points 17.1 DONE
+     *      Clean up: ISplineGenerator and its current implementations 17.1 DONE
+     *      Static versions of Generator functions except splitsegment, for now 17.1 DONE
+     *      Hermite splines do not update when moving the tangent point; segmenttopoindices does not work here; why 17.1 DONE
+     *      when rotating, disallow ones that would influence points not in current space 17.1
+     *      Pointtosegmentindeces not perfect yet; moving the earlier points gives points it could leave 17.1 DONE
+     *      
+     *      distance broken for: cardinal, catmull, bspline (ignore bspline for now) 21.1 DONE
+     *      check out: what happens if you insert(SegmentCount, element)? it should allow, but i dont think it does rn 21.1 DONE
+     *      space broken when there is a rotation, i think thats the reason at least 21.1 DONE
+     *      
+     *      Begin editors 22.1
+     *      
+     *      [SerializeField] Spline spline will create empty / uninitialized spline, is that okay or needs fixing?
+     *      
+     *      BGenerator (SplitSegment, GetExtrmaTs) ? Or maybe those operations are not implementable for bspline
+     *      Create thorough tests fuccckckckc
+     *      
+     *      (maybe ISpline, ISplineTransformable and ISplineEditbale for Spline)
+     *      
+     *      How to decide a good "standard accuracy"? 
+     *          => simply get one from isplinegenerator
+     *          => length + avg. curvature of spline?
+     *          => maybe combine these approaches? 
+     *              => get standard accuracy from generator
+     *              => then: avg. curvature * length * accuracy
+     *              
+     *      General performance improvements; (pretty good generally, but drawing spline normals get reaaaly slow when spline is long)
+     *            
+     *      Other generators (over time)
+     *      also; make some more "complex" stuff like splitsegment and maybe even getextrema optional; in that case also make sure the editor does not call them in that case
+     *      
+     *      Editors (note: get3dintersect really only works when editor is in 3d space)
+     *      _____________________________________
+     *      
+     *      Stuff that i should probably/maybe do too:
+     *      Mesh generation
+     *      Documentation
+     * 
+     *      TODO Later on (as in, when otherwise mostly done):
+     *      make use of IList, Icollection, ienumerable more consistent to some rules
+     *      SHould do: move more functionality over to the cacher class, ie accuracy and adding new entries, maybe
+     *      Make listsegment indicate its readonly; maybe implement ireadonlylist 
+     *      collections
+     *          => ListSegment issues
+     *          => Cacher issues
+     *          =>
+     */
+
     [System.Serializable]
     public abstract class SplineBase
     {
@@ -52,6 +120,7 @@ namespace UnitySplines
         }
         #endregion
 
+        protected SplineBase() { }
         public SplineBase(ISplineGenerator generator, bool cache, params Vector3[] points) => InitSpline(generator, cache, SplineUtility.VectorsToSplinePoints(points));
         public SplineBase(ISplineGenerator generator, bool cache, IEnumerable<Vector3> points) => InitSpline(generator, cache, SplineUtility.VectorsToSplinePoints(points));
         public SplineBase(ISplineGenerator generator, bool cache, SegmentedCollection<Vector3> points) => InitSpline(generator, cache, SplineUtility.VectorsToSplinePoints(points));
@@ -285,7 +354,7 @@ namespace UnitySplines
             }
             // If exact match is found
             else
-            { 
+            {
                 return (float)(index) / (distances.Count - 1) * SegmentCount;
             }
 
@@ -364,6 +433,9 @@ namespace UnitySplines
         [SerializeField] protected SegmentedCollection<Vector3> _pointPositions;
         [SerializeField] protected SegmentedCollection<float> _pointNormals;
 
+        [SerializeField] protected SegmentedReadOnlyCollection<Vector3> _readOnlyPointPositions;
+        [SerializeField] protected SegmentedReadOnlyCollection<float> _readOnlyPointNormals;
+
         [SerializeField] protected ISplineGenerator _generator;
         [SerializeField] protected SplineCacher _cacher;
 
@@ -393,6 +465,9 @@ namespace UnitySplines
                 _cacher = new SplineCacher();
                 for (int i = 0; i < SegmentCount; i++) _cacher.Add();
             }
+
+            _readOnlyPointPositions = new SegmentedReadOnlyCollection<Vector3>(_generator.SegmentSize, _generator.SlideSize, _pointPositions);
+            _readOnlyPointNormals = new SegmentedReadOnlyCollection<float>(_generator.SegmentSize, _generator.SlideSize, _pointNormals);
 
             _space = SplineSpace.XYZ;
             _posRotScale = new PosRotScale() { position = Vector3.zero, scale = Vector3.one, rotation = Quaternion.identity };

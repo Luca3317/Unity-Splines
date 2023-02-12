@@ -198,7 +198,6 @@ namespace UnitySplines
             if (accuracy < 1) throw new System.ArgumentOutOfRangeException();
 
             List<Vector3> flattened = new List<Vector3>();
-            //flattened.Add(points[0]);
             for (int i = 0; i < accuracy; i++)
                 flattened.Add(generator.Evaluate((float)i / (accuracy - 1), points));
 

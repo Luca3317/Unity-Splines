@@ -16,13 +16,15 @@ namespace UnitySplines
 
         public T this[int i]
         {
-            get => _items[i];
+            get => _items[i]; 
             set => _items[i] = value;
         }
 
         public ListSegment<T> Segment(int segmentIndex) => new ListSegment<T>(_items, MathUtility.SegmentToPointIndex(segmentIndex, _segmentSize, _slideSize), _segmentSize);
 
-        public SegmentedCollection(int segmentSize, int slideSize) 
+        public SegmentedCollection()  
+        { }
+        public SegmentedCollection(int segmentSize, int slideSize)
         {
             _items = new List<T>();
             SetSegmentSizes(segmentSize, slideSize);
@@ -33,7 +35,7 @@ namespace UnitySplines
             SetSegmentSizes(segmentSize, slideSize);
         }
 
-        public void AddSegment(IEnumerable<T> items)
+        public void AddSegment(IEnumerable<T> items) 
         {
             int count = 0;
             ICollection<T> collection = items as ICollection<T>;
@@ -119,6 +121,7 @@ namespace UnitySplines
 
         public void RemoveSegmentRange(int segmentIndex, int count)
         {
+            Debug.Log("im removing " + count + " points");
             for (int i = 0; i < count; i++)
             {
                 for (int j = 0; j < _slideSize; j++)
@@ -152,6 +155,7 @@ namespace UnitySplines
         /// <exception cref="ArgumentException">Thrown if either segmentSize or slideSize is lower than 1.</exception>
         public void SetSegmentSizes(int segmentSize, int slideSize)
         {
+            Debug.Log("Im setting new segmetnsizes of " + segmentSize + " and " + slideSize);
             if (segmentSize < 1 || slideSize < 1) throw new System.ArgumentException(_segmentSizeAtLeast1ErrorMsg);
             if (segmentSize < slideSize) throw new System.ArgumentException(string.Format(_segmentSizeSmallerThanSlideErrorMsg));
             if (_items.Count < segmentSize) throw new System.ArgumentException(string.Format(_tooFewItemsToConvertErrorMsg, _items.Count, segmentSize));
@@ -164,12 +168,16 @@ namespace UnitySplines
 
             _segmentSize = segmentSize;
             _slideSize = slideSize;
+
+            Debug.Log("did it all!!");
         }
 
         public void CopyTo(T[] array, int index)
         {
             _items.CopyTo(array, index);
         }
+
+        public SegmentedReadOnlyCollection<T> AsReadOnly() => new SegmentedReadOnlyCollection<T>(_segmentSize, _slideSize, _items);
 
         public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
 

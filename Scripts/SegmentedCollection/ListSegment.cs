@@ -15,6 +15,7 @@ namespace UnitySplines
      * 
      * Alternatively, class CollectionSegment : ReadOnlyCollection
      */
+    [System.Serializable]
     public readonly struct ListSegment<T> : IList<T>, ICollection<T>, IEnumerable<T>, IReadOnlyCollection<T>, IReadOnlyList<T>, IEnumerable
     {
         private IList<T> Items { get; }
