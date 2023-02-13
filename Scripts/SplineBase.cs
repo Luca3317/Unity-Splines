@@ -364,7 +364,7 @@ namespace UnitySplines
         [SerializeField] protected SegmentedCollection<Vector3> _pointPositions;
         [SerializeField] protected SegmentedCollection<float> _pointNormals;
 
-        [SerializeField] protected ISplineGenerator _generator;
+        [SerializeReference] protected ISplineGenerator _generator;
         [SerializeField] protected SplineCacher _cacher;
 
         [SerializeField] protected SplineSpace _space;
