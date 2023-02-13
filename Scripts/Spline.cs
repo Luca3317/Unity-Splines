@@ -129,6 +129,10 @@ namespace UnitySplines
         {
             if (_posRotScale.scale == newScale) return;
 
+            if (newScale.x == 0) newScale.x = 0.0001f;
+            if (newScale.y == 0) newScale.y = 0.0001f;
+            if (newScale.z == 0) newScale.z = 0.0001f;
+            
             Vector3 pivot = GetBounds().center;
 
             for (int i = 0; i < _pointPositions.Count; i++)
@@ -136,7 +140,6 @@ namespace UnitySplines
                 // Get current scale
                 Vector3 pos = _pointPositions[i];
                 // Unapply current scale
-                // TODO prevent division by 0
                 pos = SplineUtility.ApplyScale(pos, pivot, new Vector3(1f / _posRotScale.scale.x, 1f / _posRotScale.scale.y, 1f / _posRotScale.scale.z));
                 // Apply new scale
                 _pointPositions.SetItem(i, SplineUtility.ApplyScale(pos, pivot, newScale));
