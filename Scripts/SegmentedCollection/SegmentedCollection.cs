@@ -28,8 +28,8 @@ namespace UnitySplines
             SetSegmentSizes(segmentSize, slideSize);
         }
         public SegmentedCollection(int segmentSize, int slideSize, IList<T> list)
-        {
-            _items = list;
+        {  
+            _items =  new List<T>(list);
             SetSegmentSizes(segmentSize, slideSize);
         }
 
@@ -45,7 +45,7 @@ namespace UnitySplines
                 {
                     while (enumerator.MoveNext())
                         count++;
-                }
+                } 
             }
 
             if (count != _slideSize) throw new System.ArgumentException();
@@ -269,6 +269,6 @@ namespace UnitySplines
 
         [SerializeField] private int _segmentSize;
         [SerializeField] private int _slideSize;
-        [SerializeField] private IList<T> _items;
+        [SerializeField] private List<T> _items;
     }
 }
