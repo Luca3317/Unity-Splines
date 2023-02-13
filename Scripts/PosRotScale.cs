@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace UnitySplines
 {
+    [System.Serializable]
     public struct PosRotScale
     {
         public Vector3 position;
