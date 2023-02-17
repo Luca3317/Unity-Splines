@@ -11,26 +11,39 @@ namespace UnitySplines
     {
         public int SegmentSize => _segmentSize;
         public int SlideSize => _slideSize;
-        public int SegmentCount => _items.Count >= _segmentSize ? (_items.Count - _segmentSize) / _slideSize + 1 : 0;
+        public int SegmentCount => _items.Count >= _segmentSize ? (_items.Count - _segmentSize) / _slideSize + 1 + LoopSegmentCount : 0;
+        public int LoopSegmentCount => _loops ? (SegmentSize - 1) / SlideSize : 0;
         public int Count => _items.Count;
+        public bool Loops => _loops;
 
         public T this[int i]
         {
-            get => _items[i];
-            set => _items[i] = value;
+            get => _items[_loops ? i % _items.Count : i];
+            set => _items[_loops ? i % _items.Count : i] = value;
         }
 
         public ListSegment<T> Segment(int segmentIndex) => new ListSegment<T>(_items, MathUtility.SegmentToPointIndex(segmentIndex, _segmentSize, _slideSize), _segmentSize);
 
-        public SegmentedCollection(int segmentSize, int slideSize) 
+        // TODO
+        // Either get rid of this constructor or allow creating empty segmentedcollections which will require a segmentSized collection before allowing the adding of slideSized ones.
+        // This would require an additional check and case handling in pretty much every function and property though.
+        public SegmentedCollection(int segmentSize, int slideSize, bool loops = false)
         {
             _items = new List<T>();
             SetSegmentSizes(segmentSize, slideSize);
+            SetLoops(loops);
         }
-        public SegmentedCollection(int segmentSize, int slideSize, IList<T> list)
-        {  
-            _items =  new List<T>(list);
+
+        public SegmentedCollection(int segmentSize, int slideSize, IList<T> list, bool loops = false)
+        {
+            _items = new List<T>(list);
             SetSegmentSizes(segmentSize, slideSize);
+
+            if (loops)
+            {
+                List<T> concreteList = new List<T>(list);
+                SetLoops(true, concreteList.GetRange(concreteList.Count - (concreteList.Count - SegmentSize) % SlideSize, (concreteList.Count - SegmentSize) % SlideSize));
+            }
         }
 
         public void AddSegment(IEnumerable<T> items)
@@ -45,7 +58,7 @@ namespace UnitySplines
                 {
                     while (enumerator.MoveNext())
                         count++;
-                } 
+                }
             }
 
             if (count != _slideSize) throw new System.ArgumentException();
@@ -126,11 +139,15 @@ namespace UnitySplines
             }
         }
 
-        public void SetItem(int pointIndex, T item) => _items[pointIndex] = item;
+        public void SetItem(int pointIndex, T item) => this[pointIndex] = item;
 
         public bool Contains(T item) => _items.Contains(item);
 
-        public void Clear() => _items.Clear();
+        public void Clear()
+        {
+            SetLoops(false);
+            _items.Clear();
+        }
 
         public int IndexOf(T item) => _items.IndexOf(item);
         public IEnumerable<int> SegmentIndecesOf(T item) => SegmentIndecesOf(_items.IndexOf(item));
@@ -153,7 +170,7 @@ namespace UnitySplines
         public void SetSegmentSizes(int segmentSize, int slideSize)
         {
             if (segmentSize < 1 || slideSize < 1) throw new System.ArgumentException(_segmentSizeAtLeast1ErrorMsg);
-            if (segmentSize < slideSize) throw new System.ArgumentException(string.Format(_segmentSizeSmallerThanSlideErrorMsg));
+            if (segmentSize < slideSize) throw new System.ArgumentException(_segmentSizeSmallerThanSlideErrorMsg);
             if (_items.Count < segmentSize) throw new System.ArgumentException(string.Format(_tooFewItemsToConvertErrorMsg, _items.Count, segmentSize));
 
             int count = (_items.Count - segmentSize) % slideSize;
@@ -164,6 +181,33 @@ namespace UnitySplines
 
             _segmentSize = segmentSize;
             _slideSize = slideSize;
+        }
+
+        public void SetLoops(bool loops, IList<T> loopConnectionPoints = null)
+        {
+            if (_loops == loops) return;
+
+            if (loops)
+            {
+                if (loopConnectionPoints != null)
+                {
+                    if (loopConnectionPoints.Count > _slideSize - 1) throw new System.ArgumentException(string.Format(_tooManyConnectionPointsErrorMsg, loopConnectionPoints.Count, _slideSize));
+                    else _items.AddRange(loopConnectionPoints);
+                }
+            }
+            else
+            {
+                int pointsToRemove = (Count - _segmentSize) % _slideSize;
+                _items.RemoveRange(Count - pointsToRemove, pointsToRemove);
+            }
+
+            _loops = loops;
+        }
+
+        public ListSegment<T> GetLoopConnectionPoints()
+        {
+            if (!_loops) return new ListSegment<T>();
+            return new ListSegment<T>(_items, _items.Count - (_items.Count - _segmentSize) % _slideSize, (_items.Count - _segmentSize) % _slideSize);
         }
 
         public void CopyTo(T[] array, int index)
@@ -266,9 +310,12 @@ namespace UnitySplines
         private const string _tooFewItemsToConvertErrorMsg = "The amount of items ({0}) is not sufficient to set segmentSize to {1}";
         private const string _incompatibleAmountOfItemsErrorMsg = "The amount of passed in items ({0}) is incompatible with segmentSize {1} and slideSize {2}";
         private const string _incompatibleAmountOfNewItemsErrorMsg = "Invalid amount of items to form one new segment. Expected amount: {0}";
+        private const string _tooManyConnectionPointsErrorMsg = "Tried to set the segmented collection to loop with too many connection points ({0}) for the slideSize ({1})";
+
 
         [SerializeField] private int _segmentSize;
         [SerializeField] private int _slideSize;
         [SerializeField] private List<T> _items;
+        [SerializeField] private bool _loops = false;
     }
 }
