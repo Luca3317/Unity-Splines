@@ -527,14 +527,17 @@ namespace UnitySplines
             List<float> list = new List<float>();
 
             Vector3 segStart, segEnd;
-            float step = 1f / accuracy;
 
-            for (float i = 0; i < 1f; i += step)
+            for (int i = 0; i < spline.SegmentCount; i++)
             {
-                segStart = spline.ValueAt(i);
-                segEnd = spline.ValueAt(i + step);
-                if (LineSegmentsIntersect(segStart, segEnd, start, end, dimension, epsilon))
-                    list.Add(i + (step / 2f));
+                for (int j = 0; j < accuracy; j++)
+                {
+                    segStart = spline.ValueAt(i + (float)j / accuracy);
+                    segEnd = spline.ValueAt(i + (float)(j + 1) / accuracy);
+
+                    if (LineSegmentsIntersect(segStart, segEnd, start, end, dimension, epsilon))
+                        list.Add((i + (float)j / accuracy + i + (float)(j + 1) / accuracy) / 2f);
+                }
             }
 
             return list;
