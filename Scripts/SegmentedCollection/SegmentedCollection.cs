@@ -18,11 +18,11 @@ namespace UnitySplines
 
         public T this[int i]
         {
-            get => _items[_loops ? i % _items.Count : i];
-            set => _items[_loops ? i % _items.Count : i] = value;
+            get => _items[_loops ? MathUtility.LoopedIndexToDirectIndex(i, _items.Count) : i];
+            set => _items[_loops ? MathUtility.LoopedIndexToDirectIndex(i, _items.Count) : i] = value;
         }
 
-        public ListSegment<T> Segment(int segmentIndex) => new ListSegment<T>(_items, MathUtility.SegmentToPointIndex(segmentIndex, _segmentSize, _slideSize), _segmentSize);
+        public ListSegment<T> Segment(int segmentIndex) => new ListSegment<T>(this, MathUtility.SegmentToPointIndex(segmentIndex, _segmentSize, _slideSize), _segmentSize);
 
         // TODO
         // Either get rid of this constructor or allow creating empty segmentedcollections which will require a segmentSized collection before allowing the adding of slideSized ones.
@@ -151,15 +151,7 @@ namespace UnitySplines
 
         public int IndexOf(T item) => _items.IndexOf(item);
         public IEnumerable<int> SegmentIndecesOf(T item) => SegmentIndecesOf(_items.IndexOf(item));
-        public IEnumerable<int> SegmentIndecesOf(int pointIndex)
-        {
-            IList<int> indeces = MathUtility.PointToSegmentIndeces(pointIndex, _segmentSize, _slideSize);
-            for (int i = 0; i < indeces.Count; i++)
-                if (indeces[i] >= SegmentCount)
-                    indeces.RemoveAt(i--);
-
-            return indeces;
-        }
+        public IEnumerable<int> SegmentIndecesOf(int pointIndex) => MathUtility.PointToSegmentIndeces(pointIndex, _segmentSize, _slideSize, _items.Count, SegmentCount, _loops);
 
         /// <summary>
         /// Sets the segment sizes.
@@ -207,7 +199,7 @@ namespace UnitySplines
         public ListSegment<T> GetLoopConnectionPoints()
         {
             if (!_loops) return new ListSegment<T>();
-            return new ListSegment<T>(_items, _items.Count - (_items.Count - _segmentSize) % _slideSize, (_items.Count - _segmentSize) % _slideSize);
+            return new ListSegment<T>(this, _items.Count - (_items.Count - _segmentSize) % _slideSize, (_items.Count - _segmentSize) % _slideSize);
         }
 
         public void CopyTo(T[] array, int index)
