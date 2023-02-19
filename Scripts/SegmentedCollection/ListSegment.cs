@@ -28,11 +28,6 @@ namespace UnitySplines
             Items = items ?? throw new ArgumentNullException(nameof(items));
             Offset = offset;
             Count = count;
-
-            if (items.Count < offset + count)
-            {
-                throw new ArgumentException("List segment out of range.", nameof(count));
-            }
         }
 
         public void CopyTo(T[] array, int index)
@@ -64,12 +59,10 @@ namespace UnitySplines
 
         private T ElementAt(int index)
         {
-            if (Count > 0)
-            {
-                return Items[Offset + index];
-            }
+            if (index < 0 || Count <= index)
+                throw new ArgumentOutOfRangeException(nameof(index));
 
-            throw new ArgumentOutOfRangeException(nameof(index));
+            return Items[(Offset + index) % Items.Count];
         }
 
         public ListSegmentEnumerator GetEnumerator() => new ListSegmentEnumerator(this);
