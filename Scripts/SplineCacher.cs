@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace UnitySplines
 {
+    [System.Serializable]
     public class SplineCacher : CurveCacher
     {
         public IList<CurveCacher> CurveCaches => _curveCaches;
@@ -23,9 +24,9 @@ namespace UnitySplines
         public void SetSize(int size)
         {
             if (size > _curveCaches.Count) while (size > _curveCaches.Count) _curveCaches.Add(new CurveCacher());
-            else while (size < _curveCaches.Count) _curveCaches.RemoveAt(0);
+            else while (size < _curveCaches.Count) _curveCaches.RemoveAt(_curveCaches.Count -1);
         }
 
-        private List<CurveCacher> _curveCaches;
+        [SerializeField] private List<CurveCacher> _curveCaches;
     }
 }
