@@ -38,9 +38,7 @@ namespace UnitySplines
 
                 foreach (int segmentIndex in segmentIndeces)
                 {
-                    int seg = segmentIndex;
-                    if (seg < 0) seg += PointCount;
-                    _cacher[seg].Clear();
+                    _cacher[MathUtility.LoopedIndexToDirectIndex(segmentIndex, SegmentCount)].Clear();
                 }
 
                 _cacher.Clear();
