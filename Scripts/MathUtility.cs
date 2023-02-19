@@ -4,33 +4,109 @@ using UnityEngine;
 
 public static class MathUtility
 {
+    public static IList<int> PointToSegmentIndeces(int pointIndex, int segmentSize, int slideSize, int segmentCount = -1)
+    {
+        List<int> indeces = new List<int>();
+        int firstSegmentIndex = PointToFirstSegmentIndex(pointIndex, segmentSize, slideSize);
+        int firstIndex = firstSegmentIndex * slideSize;
+        while (firstIndex <= pointIndex)
+        {
+            if (indeces.Contains(firstSegmentIndex) || (segmentCount >= 0 && firstSegmentIndex >= segmentCount)) return indeces;
+            indeces.Add(firstSegmentIndex++);
+            firstIndex += slideSize;
+        }
+        return indeces;
+    }
+
     /// <summary>
     /// Converts a point index to the corresponding segment indeces.
     /// </summary>
     /// <param name="pointIndex">The point index that will be converted.</param>
     /// <returns>The indeces of all segments that contain the point at i.</returns>
-    public static IList<int> PointToSegmentIndeces(int pointIndex, int segmentSize, int slideSize)
+    public static IList<int> PointToSegmentIndeces(int pointIndex, int segmentSize, int slideSize, int pointCount, int segmentCount, bool loops)
     {
+        if (!loops) return PointToSegmentIndeces(pointIndex, segmentSize, slideSize, segmentCount);
+
         List<int> indeces = new List<int>();
+        pointIndex = LoopedIndexToDirectIndex(pointIndex, pointCount);
 
-        int firstSegmentIndex = PointToFirstSegmentIndex(pointIndex, segmentSize, slideSize);
-        int firstIndex = firstSegmentIndex * slideSize;
+        int firstSegmentIndex = PointToFirstSegmentIndex(pointIndex, segmentSize, slideSize, pointCount, segmentCount, loops);
 
-        while (firstIndex <= pointIndex)
+        // TODO
+        // This works for all tested cases, but might still not work universally
+        int indecesAmount = segmentSize / slideSize;
+        if (pointIndex % slideSize < segmentSize % slideSize) indecesAmount += (segmentSize % slideSize) - (pointIndex % slideSize);
+
+        for (int i = 0; i < indecesAmount; i++)
         {
             indeces.Add(firstSegmentIndex++);
-            firstIndex += slideSize;
         }
 
         return indeces;
     }
+
+    /// <summary>
+    /// Get the index of the first segment containing a point.
+    /// </summary>
+    /// <param name="pointIndex"></param>
+    /// <param name="segmentSize"></param>
+    /// <param name="slideSize"></param>
+    /// <returns></returns>
     public static int PointToFirstSegmentIndex(int pointIndex, int segmentSize, int slideSize) => pointIndex < segmentSize ? 0 : (pointIndex - segmentSize) / slideSize + 1;
+
+    /// <summary>
+    /// Get the index of the first segment containing a point.
+    /// If looping, will not necessarily return the segment with the smallest index, but the first of the consecutive segments containing the point.
+    /// </summary>
+    /// <param name="pointIndex"></param>
+    /// <param name="segmentSize"></param>
+    /// <param name="slideSize"></param>
+    /// <param name="pointCount"></param>
+    /// <param name="segmentCount"></param>
+    /// <param name="loops"></param>
+    /// <returns></returns>
+    public static int PointToFirstSegmentIndex(int pointIndex, int segmentSize, int slideSize, int pointCount, int segmentCount, bool loops)
+    {
+        if (!loops) return PointToFirstSegmentIndex(pointIndex, segmentSize, slideSize);
+
+        pointIndex = LoopedIndexToDirectIndex(pointIndex, pointCount);
+        int segmentIndex = pointIndex < segmentSize ? 0 : (pointIndex - segmentSize) / slideSize + 1;
+
+        if (segmentIndex != 0)
+        {
+            return segmentIndex;
+        }
+
+        int start = 0;
+        int end = segmentSize;
+
+        while (start <= pointIndex && end > pointIndex)
+        {
+            segmentIndex--;
+            segmentIndex = LoopedIndexToDirectIndex(segmentIndex, segmentCount);
+
+            start -= slideSize;
+            end = start + segmentSize;
+        }
+        segmentIndex++;
+        segmentIndex = LoopedIndexToDirectIndex(segmentIndex, segmentCount);
+
+        return segmentIndex;
+    }
+
     /// <summary>
     /// Converts a segment index to the corresponding point index.
     /// </summary>
     /// <param name="segmentIndex">The segment index to convert.</param>
     /// <returns>The index of the first point contained in this segment.</returns>
     public static int SegmentToPointIndex(int segmentIndex, int segmentSize, int slideSize) => slideSize * segmentIndex;
+
+    public static int LoopedIndexToDirectIndex(int loopedIndex, int itemCount)
+    {
+        while (loopedIndex < 0) loopedIndex += itemCount;
+        loopedIndex %= itemCount;
+        return loopedIndex;
+    }
 
 
 
