@@ -11,6 +11,7 @@ namespace UnitySplines
         public int Accuracy => _accuracy;
         public SplineSpace Space => _space;
         public float NormalAngleOffset => _normalAngleOffset;
+        public bool Loops => _pointPositions.Loops;
 
         public Vector3 position => _posRotScale.position;
         public Quaternion rotation => _posRotScale.rotation;
@@ -28,6 +29,9 @@ namespace UnitySplines
         /// Return the amount of segments in the collection.
         /// </summary>
         public int SegmentCount => _pointPositions.SegmentCount;
+
+        public int LoopSegmentCount => _pointPositions.LoopSegmentCount;
+        public ListSegment<Vector3> GetLoopConnectionPoints() => _pointPositions.GetLoopConnectionPoints();
 
         public Vector3 PointPosition(int pointIndex) => _pointPositions[pointIndex];
         public float PointNormal(int pointIndex) => _pointNormals[pointIndex];
@@ -405,6 +409,16 @@ namespace UnitySplines
             spline._accuracy = _accuracy;
             spline._posRotScale = _posRotScale;
             spline._space = _space;
+
+            // TODO
+            // This sets the "loop" of the ro spline as well as adding necessary connection points
+            // Keep this? An alternative would be to allow creating looping splines from the constructor (segmentedcollections constructor already allows for this, but not splinebase's)
+            if (Loops)
+            {
+                spline._pointPositions.SetLoops(true, _pointPositions.GetLoopConnectionPoints());
+                spline._pointNormals.SetLoops(true, _pointNormals.GetLoopConnectionPoints());
+            }
+
             return spline;
         }
 

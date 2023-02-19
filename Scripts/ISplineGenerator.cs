@@ -73,6 +73,13 @@ namespace UnitySplines
         /// <returns></returns>
         public (int firstSegmentIndex, IList<Vector3> newSegments) SplitSegment(float t, int segmentIndex, SplineBase spline);
 
+        /// <summary>
+        /// Get points necessary to loop the spline.
+        /// </summary>
+        /// <param name="spline"></param>
+        /// <returns></returns>
+        public IList<Vector3> GetLoopConnectionPoints(SplineBase spline);
+
         protected const string _pointAmountErrorMessage = "The passed in amount of points ({0}) does not constitute exactly one {1} segment (required amount: {2})";
     }
 }

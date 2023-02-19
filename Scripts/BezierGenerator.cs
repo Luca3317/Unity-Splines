@@ -10,10 +10,10 @@ namespace UnitySplines.Bezier
         public int SlideSize => _slideSize;
         public string GeneratorType => _generatorType;
 
-        public static Vector3 Evaluate(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3) 
+        public static Vector3 Evaluate(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
             => SplineUtility.Evaluate(t, 0, _characteristicMatrix, p0, p1, p2, p3);
 
-        public static Vector3 EvaluateDerivative(float t, int order, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3) 
+        public static Vector3 EvaluateDerivative(float t, int order, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
             => SplineUtility.Evaluate(t, order, _characteristicMatrix, p0, p1, p2, p3);
 
         public static IList<float> GetExtremaTs(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
@@ -40,7 +40,7 @@ namespace UnitySplines.Bezier
             Vector3 splitPoint = Evaluate(t, p0, p1, p2, p3);
 
             float t2 = t * t;
-            float mt2 = (t - 1) * (t - 1);
+            float mt2 = (1-t) * (1-t);
             List<Vector3> newPoints = new List<Vector3>();
             newPoints.Add(p0);
             newPoints.Add(t * p1 - (t - 1) * p0);
@@ -80,6 +80,14 @@ namespace UnitySplines.Bezier
         {
             IList<Vector3> segment = spline.SegmentPositions(segmentIndex);
             return (segmentIndex, SplitSegment(t, segment[0], segment[1], segment[2], segment[3]));
+        }
+
+        public IList<Vector3> GetLoopConnectionPoints(SplineBase spline)
+        {
+            List<Vector3> loopSegment = new List<Vector3>();
+            loopSegment.Add(spline.PointPosition(spline.PointCount - 1) - (spline.PointPosition(spline.PointCount - 2) - spline.PointPosition(spline.PointCount - 1)));
+            loopSegment.Add(spline.PointPosition(0) - (spline.PointPosition(1) - spline.PointPosition(0)));
+            return loopSegment;
         }
 
         private BezierGenerator() { }

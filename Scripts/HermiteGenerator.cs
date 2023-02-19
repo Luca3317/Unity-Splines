@@ -55,6 +55,8 @@ namespace UnitySplines.Hermite
             return (segmentIndex, newSegments);
         }
 
+        public IList<Vector3> GetLoopConnectionPoints(SplineBase spline) => new List<Vector3>();
+
         private HermiteGenerator() { }
 
         private const int _segmentSize = 4;

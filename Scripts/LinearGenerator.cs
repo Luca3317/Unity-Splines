@@ -55,6 +55,8 @@ namespace UnitySplines.Linear
             return (segmentIndex, segment);
         }
 
+        public IList<Vector3> GetLoopConnectionPoints(SplineBase spline) => new List<Vector3>();
+
         private LinearGenerator() { }
 
         private const int _segmentSize = 2;

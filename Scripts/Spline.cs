@@ -38,10 +38,11 @@ namespace UnitySplines
 
                 foreach (int segmentIndex in segmentIndeces)
                 {
-                    if (segmentIndex > SegmentCount - 1)
-                        break;
-                    _cacher[segmentIndex].Clear();
+                    int seg = segmentIndex;
+                    if (seg < 0) seg += PointCount;
+                    _cacher[seg].Clear();
                 }
+
                 _cacher.Clear();
             }
         }
@@ -56,9 +57,15 @@ namespace UnitySplines
             if (generator == _generator) return;
             if (PointCount < generator.SegmentSize) return;
 
+            bool looped = Loops;
+            SetLoops(false);
+
             _generator = generator;
             _pointPositions.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
             _pointNormals.SetSegmentSizes(_generator.SegmentSize, _generator.SlideSize);
+
+            if (looped) SetLoops(true);
+
             if (_cacher != null)
             {
                 _cacher.SetSize(SegmentCount);
@@ -132,7 +139,7 @@ namespace UnitySplines
             if (newScale.x == 0) newScale.x = 0.0001f;
             if (newScale.y == 0) newScale.y = 0.0001f;
             if (newScale.z == 0) newScale.z = 0.0001f;
-            
+
             Vector3 pivot = GetBounds().center;
 
             for (int i = 0; i < _pointPositions.Count; i++)
@@ -169,6 +176,36 @@ namespace UnitySplines
             _normalAngleOffset = newNormalAngleOffset % 360;
         }
 
+        public void SetLoops(bool loops)
+        {
+            if (loops == Loops) return;
+            // TOOD rn this will only work for bezier (if that)
+            if (loops)
+            {
+                IList<Vector3> connectionPoints = _generator.GetLoopConnectionPoints(this);
+                _pointPositions.SetLoops(loops, connectionPoints);
+
+                IList<float> connectionNormals = new List<float>();
+                for (int i = 0; i < connectionPoints.Count; i++) connectionNormals.Add(0f);
+
+                _pointNormals.SetLoops(loops, connectionNormals);
+
+                if (_cacher != null)
+                {
+                    _cacher.SetSize(SegmentCount);
+                }
+            }
+            else
+            {
+                _pointPositions.SetLoops(false);
+                _pointNormals.SetLoops(false);
+                if (_cacher != null)
+                {
+                    _cacher.SetSize(SegmentCount);
+                }
+            }
+        }
+
         /// <summary>
         /// Splits the spline's segment at t in two (approximately) equivalent segments.
         /// </summary>
@@ -180,8 +217,7 @@ namespace UnitySplines
             (int firstSegmentIndex, IList<Vector3> newSegments) =
                 _generator.SplitSegment(segmentT, segmentIndex, ToReadOnly());
 
-            // TODO: Further test the second part of this check
-            if (newSegments.Count < SlideSize || newSegments.Count > PointCount - firstSegmentIndex * SlideSize + SlideSize)
+            if (newSegments.Count < SlideSize || (!Loops && newSegments.Count > PointCount - firstSegmentIndex * SlideSize + SlideSize))
                 throw new System.InvalidOperationException(string.Format(_splitSegmentFaultyAmountErrorMessage, _generator.GeneratorType, newSegments.Count, SlideSize, PointCount - firstSegmentIndex * SlideSize + SlideSize));
 
             // TODO: Maybe remove these; would put responsibility on generator
